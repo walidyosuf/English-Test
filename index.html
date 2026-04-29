@@ -1,1298 +1,599 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Angle Section Cutting Optimizer (L-Sections) - Enhanced</title>
-    <!-- Tailwind CSS CDN -->
+    <title>English Placement Test</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#059669',
-                        secondary: '#3b82f6',
-                        background: '#f8f8f8',
-                    },
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                    },
-                }
-            }
-        }
-    </script>
-    <!-- Inter Font -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #f8f8f8; }
-        .card { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.06); }
-        .table-container { max-height: 500px; overflow-y: auto; }
-        .table-container::-webkit-scrollbar { width: 8px; }
-        .table-container::-webkit-scrollbar-thumb { background-color: #d1d5db; border-radius: 4px; }
-        .table-container::-webkit-scrollbar-track { background-color: #f3f4f6; }
-        
-        .raw-length-tag {
-            background-color: #f0fdf4;
-            color: #065f46;
-            border: 1px solid #d1fae5;
-            padding: 2px 8px;
-            border-radius: 9999px;
-            font-size: 0.75rem;
-            font-weight: 600;
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: #f3f4f6;
         }
-
-        .total-row {
-            background-color: #e0f2f1;
-            font-weight: bold;
-            border-top: 3px double #065f46;
+        .option-btn {
+            transition: all 0.2s ease-in-out;
         }
-        
-        .radio-option {
-            display: flex;
-            align-items: center;
-            padding: 12px 16px;
-            border: 2px solid #e5e7eb;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        
-        .radio-option:hover {
+        .option-btn.selected {
+            background-color: #3b82f6;
+            color: white;
             border-color: #3b82f6;
         }
-        
-        .radio-option.selected {
-            border-color: #3b82f6;
-            background-color: #eff6ff;
-        }
-        
-        .radio-option input {
-            margin-right: 12px;
+        .english-text {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
     </style>
-
-    <!-- Essential Libraries for Excel/PDF Handling -->
-    <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@sheetjs/xlsx-js-style@latest/dist/xlsx.bundle.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
-
 </head>
-<body class="p-4 md:p-8">
+<body class="min-h-screen flex items-center justify-center p-4">
 
-    <header class="text-center mb-8">
-        <h1 class="text-4xl font-extrabold text-gray-800">Angle Section Cutting Optimizer (L-Sections)</h1>
-        <p class="text-gray-500 mt-2">Enhanced optimization with 10cm length increments and unlimited stock length selection</p>
-    </header>
+    <!-- الحاوية الرئيسية -->
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-3xl overflow-hidden relative">
+        
+        <!-- رأس التطبيق -->
+        <div class="bg-blue-600 p-6 text-white text-center" dir="ltr">
+            <h1 class="text-3xl font-bold mb-2 english-text">English Placement Test</h1>
+            <p class="text-blue-100 english-text">Massive question bank (250 questions) with progressive difficulty (A1 to C2)</p>
+        </div>
 
-    <main class="max-w-7xl mx-auto">
-        <!-- Input & Controls Card -->
-        <div class="card bg-white p-6 rounded-xl mb-8 border border-gray-200">
-            <h2 class="text-2xl font-semibold mb-4 text-primary">1. Data Import & Settings</h2>
-            
-            <!-- Raw Material Length Selection -->
+        <!-- شاشة الإعداد (اختيار المهارة) -->
+        <div id="setup-screen" class="p-8 text-center" dir="ltr">
+            <h2 class="text-xl font-semibold mb-6 text-gray-800 english-text">Select the skill you want to test:</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8 english-text">
+                <button onclick="selectCategory('all')" class="category-btn p-4 rounded-xl border-2 border-gray-200 hover:border-blue-500 hover:bg-blue-50 font-bold text-gray-700 transition">
+                    🌐 All Skills (50 Questions)
+                </button>
+                <button onclick="selectCategory('grammar')" class="category-btn p-4 rounded-xl border-2 border-gray-200 hover:border-blue-500 hover:bg-blue-50 font-bold text-gray-700 transition">
+                    📝 Grammar (50 Questions)
+                </button>
+                <button onclick="selectCategory('vocabulary')" class="category-btn p-4 rounded-xl border-2 border-gray-200 hover:border-blue-500 hover:bg-blue-50 font-bold text-gray-700 transition">
+                    📚 Vocabulary (50 Questions)
+                </button>
+                <button onclick="selectCategory('reading')" class="category-btn p-4 rounded-xl border-2 border-gray-200 hover:border-blue-500 hover:bg-blue-50 font-bold text-gray-700 transition">
+                    📖 Reading (50 Questions)
+                </button>
+                <button onclick="selectCategory('listening')" class="category-btn p-4 rounded-xl border-2 border-gray-200 hover:border-blue-500 hover:bg-blue-50 font-bold text-gray-700 transition">
+                    🎧 Listening (50 Questions)
+                </button>
+                <button onclick="selectCategory('writing')" class="category-btn p-4 rounded-xl border-2 border-gray-200 hover:border-blue-500 hover:bg-blue-50 font-bold text-gray-700 transition">
+                    ✍️ Writing (50 Questions)
+                </button>
+            </div>
+            <button id="start-btn" onclick="startQuiz()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-12 rounded-full text-lg shadow-lg opacity-50 cursor-not-allowed transition english-text" disabled>
+                Start Test
+            </button>
+        </div>
+
+        <!-- شاشة الاختبار -->
+        <div id="quiz-screen" class="p-8 hidden">
+            <!-- شريط التقدم -->
             <div class="mb-6">
-                <h3 class="text-lg font-medium text-gray-700 mb-3">Raw Material Length Selection</h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="radio-option" onclick="selectOption('fixed')" id="fixed-option">
-                        <input type="radio" id="fixed-length" name="raw-material" value="fixed" checked>
-                        <label for="fixed-length" class="cursor-pointer">
-                            <div class="font-semibold">Fixed 12M Length</div>
-                            <div class="text-sm text-gray-500">Use standard 12-meter (12000mm) raw material lengths for all cuts</div>
-                        </label>
-                    </div>
-                    <div class="radio-option" onclick="selectOption('variable')" id="variable-option">
-                        <input type="radio" id="variable-length" name="raw-material" value="variable">
-                        <label for="variable-length" class="cursor-pointer">
-                            <div class="font-semibold">Variable Lengths (Optimized)</div>
-                            <div class="text-sm text-gray-500">Optimize with 10cm increments (6000mm to 13000mm)</div>
-                        </label>
-                    </div>
+                <div class="flex justify-between text-sm text-gray-600 mb-2 font-semibold">
+                    <span id="question-counter">السؤال 1 من 50</span>
+                    <span id="difficulty-badge" class="px-2 py-1 bg-green-100 text-green-800 rounded text-xs">مبتدئ (A1)</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2.5">
+                    <div id="progress-bar" class="bg-blue-600 h-2.5 rounded-full transition-all duration-300" style="width: 2%"></div>
                 </div>
             </div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
-                <!-- File Input -->
-                <div class="col-span-1">
-                    <label for="excel-file" class="block text-sm font-medium text-gray-700 mb-2">Upload Excel Requirements Sheet (.xlsx)</label>
-                    <input type="file" id="excel-file" accept=".xlsx" class="w-full text-sm text-gray-500
-                        file:mr-4 file:py-2 file:px-4
-                        file:rounded-full file:border-0
-                        file:text-sm file:font-semibold
-                        file:bg-primary/10 file:text-primary
-                        hover:file:bg-primary/20
-                    ">
-                </div>
-                <!-- Calculate Button -->
-                <div class="col-span-1">
-                    <button id="calculate-btn" onclick="processFile()" disabled class="w-full bg-primary text-white py-3 px-6 rounded-full font-bold transition duration-200 hover:bg-primary/80 disabled:bg-gray-400 disabled:cursor-not-allowed">
-                        Generate Cutting Plan
-                    </button>
-                </div>
-                <!-- Loading Indicator -->
-                <div id="loading-indicator" class="col-span-1 hidden text-center md:text-left">
-                    <div class="flex items-center space-x-2 justify-center md:justify-start">
-                        <svg class="animate-spin h-5 w-5 text-secondary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        <span class="text-gray-600">Processing optimization...</span>
-                    </div>
-                </div>
-            </div>
-            <!-- Message Box -->
-            <div id="message-box" class="mt-4 p-3 rounded-lg text-sm hidden"></div>
 
-            <!-- Download Buttons -->
-            <div id="download-controls" class="mt-6 border-t pt-4 hidden">
-                <h3 class="text-lg font-semibold mb-3 text-secondary">2. Export Options</h3>
-                <div class="flex flex-wrap gap-4">
-                    <button onclick="exportToExcel()" class="flex items-center px-4 py-2 bg-green-600 text-white rounded-full font-medium hover:bg-green-700 transition duration-150">
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                        Export to Excel
-                    </button>
-                    <button onclick="exportToPDF()" class="flex items-center px-4 py-2 bg-red-600 text-white rounded-full font-medium hover:bg-red-700 transition duration-150">
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                        Export to PDF
-                    </button>
-                    <button onclick="window.print()" class="flex items-center px-4 py-2 bg-gray-600 text-white rounded-full font-medium hover:bg-gray-700 transition duration-150">
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m4 0v3m0 0h-4v-3m8 0v3m0 0h4v-3M7 9h10a1 1 0 011 1v4a1 1 0 01-1 1H7a1 1 0 01-1-1v-4a1 1 0 011-1z"></path></svg>
-                        Print Plan
+            <!-- السؤال -->
+            <div dir="ltr" class="text-left english-text mb-8">
+                <div class="flex items-start justify-between mb-6 gap-4">
+                    <h3 id="question-text" class="text-2xl font-bold text-gray-800">Question text goes here?</h3>
+                    <button id="audio-btn" onclick="playAudio()" class="hidden flex-shrink-0 bg-blue-100 hover:bg-blue-200 text-blue-700 p-3 rounded-full transition shadow-sm" title="استمع للصوت">
+                        🔊
                     </button>
                 </div>
+                <div id="options-container" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- الخيارات سيتم إضافتها هنا بواسطة الجافاسكريبت -->
+                </div>
+            </div>
+
+            <!-- زر التالي -->
+            <div class="flex justify-end">
+                <button id="next-btn" onclick="nextQuestion()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-8 rounded-lg shadow opacity-50 cursor-not-allowed transition" disabled>
+                    السؤال التالي
+                </button>
             </div>
         </div>
 
-        <!-- Output Area -->
-        <div id="output-area" class="hidden">
-            <!-- Overall Summary Report -->
-            <div class="card bg-white p-6 rounded-xl mb-8 border border-gray-200">
-                <h2 class="text-2xl font-semibold mb-4 text-gray-800">3. Overall Optimization Summary</h2>
-                <div id="overall-summary" class="grid grid-cols-3 gap-4 text-center border p-4 rounded-lg bg-primary/5">
-                    <!-- Data will be inserted here -->
+        <!-- شاشة النتائج -->
+        <div id="result-screen" class="p-8 text-center hidden">
+            <div class="mb-8">
+                <h2 class="text-3xl font-bold text-gray-800 mb-2">انتهى الاختبار!</h2>
+                <p class="text-gray-600 text-lg">لقد أتممت <span id="completed-count">50</span> سؤالاً بنجاح.</p>
+            </div>
+
+            <div class="bg-gray-50 rounded-2xl p-6 border-2 border-dashed border-gray-300 mb-8 inline-block w-full max-w-md">
+                <p class="text-xl text-gray-700 mb-2">نتيجتك هي:</p>
+                <div class="text-5xl font-bold text-blue-600 mb-4"><span id="final-score">0</span> / <span id="max-score">50</span></div>
+                <div class="border-t border-gray-200 pt-4 mt-2">
+                    <p class="text-sm text-gray-500 mb-1">مستواك المقدر بناءً على النسبة (<span id="percentage-score">0</span>%):</p>
+                    <h3 id="cefr-level" class="text-2xl font-bold text-green-600">A1 (مبتدئ)</h3>
                 </div>
-                <h2 class="text-xl font-semibold mt-6 mb-3 text-primary">3.1. Cutting Plan Details by Material Group</h2>
-                <div id="summary-table" class="table-container"></div>
             </div>
 
-            <!-- Scrap Report -->
-            <div class="card bg-white p-6 rounded-xl mb-8 border border-gray-200">
-                <h2 class="text-2xl font-semibold mb-4 text-secondary">4. Valuable Scrap Report (≥ 1.5 m)</h2>
-                <p class="text-sm text-gray-600 mb-4">Aggregated by identical length for easy inventory.</p>
-                <div id="scrap-table" class="table-container"></div>
-            </div>
-
-            <!-- Detailed Plan -->
-            <div class="card bg-white p-6 rounded-xl mb-8 border border-gray-200">
-                <h2 class="text-2xl font-semibold mb-4 text-primary">5. Detailed Cutting Plan Statement (Aggregated)</h2>
-                <div id="detail-plan" class="space-y-6"></div>
+            <div>
+                <p id="level-description" class="text-gray-600 mb-8 max-w-lg mx-auto leading-relaxed">
+                    وصف المستوى سيظهر هنا.
+                </p>
+                <button onclick="location.reload()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transition">
+                    إعادة الاختبار
+                </button>
             </div>
         </div>
 
-    </main>
+    </div>
 
     <script>
-        // --- CONSTANTS ---
-        const MIN_RAW_LENGTH = 6000; // 6 meters in mm
-        const MAX_RAW_LENGTH = 13000; // 13 meters in mm
-        const SCRAP_THRESHOLD = 1500; // 1.5 meters in mm
-        const LENGTH_INCREMENT = 100; // 10 cm increment
-
-        // Generate Available Raw Material Lengths with 10cm increments
-        const AVAILABLE_LENGTHS = [];
-        for (let length = MIN_RAW_LENGTH; length <= MAX_RAW_LENGTH; length += LENGTH_INCREMENT) {
-            AVAILABLE_LENGTHS.push(length);
-        }
-        AVAILABLE_LENGTHS.sort((a, b) => b - a); // Sort descending
-        
-        // Fixed 12M length option
-        const FIXED_LENGTH = 12000;
-
-        // قاعدة بيانات الأوزان الطولية للزوايا المتساوية
-        const ANGLE_WEIGHTS = {};
-
-        // بيانات الجدول المرفق (Angles Profiles unit wt.xlsx)
-        const tableData = [
-            ["20X20X3", "L20*3", 0.882],
-            ["20X20X4", "L20*4", 1.14],
-            ["25X25X3", "L25*3", 1.12],
-            ["25X25X4", "L25*4", 1.45],
-            ["25X25X5", "L25*5", 1.76],
-            ["30X30X3", "L30*3", 1.36],
-            ["30X30X4", "L30*4", 1.78],
-            ["30X30X5", "L30*5", 2.18],
-            ["35X35X3", "L35*3", 1.6],
-            ["35X35X4", "L35*4", 2.09],
-            ["35X35X5", "L35*5", 2.57],
-            ["40X40X3", "L40*3", 1.84],
-            ["40X40X4", "L40*4", 2.42],
-            ["40X40X5", "L40*5", 2.97],
-            ["40X40X6", "L40*6", 3.52],
-            ["45X45X3", "L45*3", 2.09],
-            ["45X45X4", "L45*4", 2.74],
-            ["45X45X4.5", "L45*4.5", 3.06],
-            ["45X45X5", "L45*5", 3.38],
-            ["45X45X6", "L45*6", 4],
-            ["50X50X3", "L50*3", 2.33],
-            ["50X50X4", "L50*4", 3.06],
-            ["50X50X5", "L50*5", 3.77],
-            ["50X50X6", "L50*6", 4.47],
-            ["50X50X7", "L50*7", 5.15],
-            ["50X50X8", "L50*8", 5.82],
-            ["55X55X4", "L55*4", 3.38],
-            ["55X55X5", "L55*5", 4.18],
-            ["55X55X6", "L55*6", 4.95],
-            ["55X55X8", "L55*8", 6.46],
-            ["60X60X4", "L60*4", 3.7],
-            ["60X60X5", "L60*5", 4.57],
-            ["60X60X6", "L60*6", 5.42],
-            ["60X60X8", "L60*8", 7.09],
-            ["60X60X10", "L60*10", 8.69],
-            ["63X63X4", "L63*4", 3.9],
-            ["63X63X5", "L63*5", 4.81],
-            ["63X63X6", "L63*6", 5.72],
-            ["65X65X5", "L65*5", 4.97],
-            ["65X65X6", "L65*6", 5.91],
-            ["65X65X7", "L65*7", 6.83],
-            ["65X65X8", "L65*8", 7.66],
-            ["70X70X5", "L70*5", 5.37],
-            ["70X70X6", "L70*6", 6.38],
-            ["70X70X7", "L70*7", 7.38],
-            ["70X70X8", "L70*8", 8.36],
-            ["70X70X9", "L70*9", 9.34],
-            ["70X70X10", "L70*10", 10.3],
-            ["75X75X5", "L75*5", 5.78],
-            ["75X75X6", "L75*6", 6.85],
-            ["75X75X7", "L75*7", 7.94],
-            ["75X75X8", "L75*8", 8.99],
-            ["75X75X9", "L75*9", 10.1],
-            ["75X75X10", "L75*10", 11.1],
-            ["80X80X6", "L80*6", 7.34],
-            ["80X80X7", "L80*7", 8.49],
-            ["80X80X8", "L80*8", 9.63],
-            ["80X80X10", "L80*10", 11.9],
-            ["80X80X12", "L80*12", 14],
-            ["90X90X6", "L90*6", 8.3],
-            ["90X90X7", "L90*7", 9.61],
-            ["90X90X8", "L90*8", 10.9],
-            ["90X90X9", "L90*9", 12.2],
-            ["90X90X10", "L90*10", 13.4],
-            ["90X90X12", "L90*12", 15.9],
-            ["100X100X6", "L100*6", 9.26],
-            ["100X100X6.5", "L100*6.5", 10.1],
-            ["100X100X7", "L100*7", 10.7],
-            ["100X100X8", "L100*8", 12.2],
-            ["100X100X9", "L100*9", 13.6],
-            ["100X100X10", "L100*10", 15],
-            ["100X100X12", "L100*12", 17.8],
-            ["100X100X14", "L100*14", 20.6],
-            ["100X100X15", "L100*15", 21.9],
-            ["100X100X16", "L100*16", 23.2],
-            ["110X110X6", "L110*6", 10.2],
-            ["110X110X7", "L110*7", 11.8],
-            ["110X110X8", "L110*8", 13.4],
-            ["110X110X9", "L110*9", 15],
-            ["110X110X10", "L110*10", 16.6],
-            ["110X110X12", "L110*12", 19.7],
-            ["110X110X16", "L110*16", 25.7],
-            ["120X120X8", "L120*8", 14.7],
-            ["120X120X9", "L120*9", 16.5],
-            ["120X120X10", "L120*10", 18.2],
-            ["120X120X11", "L120*11", 19.9],
-            ["120X120X12", "L120*12", 21.6],
-            ["120X120X13", "L120*13", 23.3],
-            ["120X120X15", "L120*15", 26.6],
-            ["125X125X8", "L125*8", 15.5],
-            ["125X125X9", "L125*9", 17.3],
-            ["125X125X10", "L125*10", 19.1],
-            ["125X125X12", "L125*12", 22.7],
-            ["125X125X14", "L125*14", 26.2],
-            ["125X125X16", "L125*16", 29.6],
-            ["130X130X8", "L130*8", 15.9],
-            ["130X130X9", "L130*9", 17.9],
-            ["130X130X10", "L130*10", 19.7],
-            ["130X130X11", "L130*11", 21.7],
-            ["130X130X12", "L130*12", 23.6],
-            ["130X130X13", "L130*13", 25.4],
-            ["130X130X14", "L130*14", 27.2],
-            ["130X130X16", "L130*16", 30.9],
-            ["140X140X9", "L140*9", 19.4],
-            ["140X140X10", "L140*10", 21.5],
-            ["140X140X12", "L140*12", 25.5],
-            ["140X140X13", "L140*13", 27.5],
-            ["150X150X10", "L150*10", 22.05],
-            ["150X150X11", "L150*11", 24.255],
-            ["150X150X12", "L150*12", 26.46],
-            ["150X150X13", "L150*13", 28.665],
-            ["150X150X14", "L150*14", 30.87],
-            ["150X150X15", "L150*15", 33.075],
-            ["150X150X16", "L150*16", 35.28],
-            ["150X150X18", "L150*18", 39.69],
-            ["150X150X20", "L150*20", 44.1],
-            ["160X160X10", "L160*10", 24.7],
-            ["160X160X11", "L160*11", 27],
-            ["160X160X12", "L160*12", 29.4],
-            ["160X160X14", "L160*14", 34],
-            ["160X160X15", "L160*15", 36.2],
-            ["160X160X16", "L160*16", 38.5],
-            ["160X160X17", "L160*17", 40.7],
-            ["160X160X18", "L160*18", 43],
-            ["160X160X19", "L160*19", 45.1],
-            ["160X160X20", "L160*20", 47.4],
-            ["175X175X12", "L175*12", 31.8],
-            ["175X175X15", "L175*15", 39.4],
-            ["180X180X12", "L180*12", 33.1],
-            ["180X180X15", "L180*15", 40.9],
-            ["180X180X16", "L180*16", 43.5],
-            ["180X180X18", "L180*18", 48.6],
-            ["180X180X20", "L180*20", 53.7],
-            ["180X180X22", "L180*22", 58.6],
-            ["200X200X12", "L200*12", 36.9],
-            ["200X200X13", "L200*13", 39.9],
-            ["200X200X14", "L200*14", 42.8],
-            ["200X200X15", "L200*15", 45.3],
-            ["200X200X16", "L200*16", 48.5],
-            ["250X250X18", "L250*18", 68.1],
-            ["250X250X19", "L250*19", 71.7],
-            ["250X250X20", "L250*20", 75.3],
-            ["250X250X21", "L250*21", 78.9],
-            ["250X250X22", "L250*22", 82.5],
-            ["250X250X23", "L250*23", 86.1],
-            ["250X250X24", "L250*24", 89.7],
-            ["250X250X25", "L250*25", 93.2],
-            ["250X250X26", "L250*26", 96.7],
-            ["250X250X27", "L250*27", 101],
-            ["250X250X28", "L250*28", 104],
-            ["250X250X29", "L250*29", 107],
-            ["250X250X30", "L250*30", 111],
-            ["250X250X31", "L250*31", 114],
-            ["250X250X32", "L250*32", 118],
-            ["250X250X33", "L250*33", 121],
-            ["250X250X34", "L250*34", 124],
-            ["250X250X35", "L250*35", 128],
-            ["300X300X25", "L300*25", 112],
-            ["300X300X26", "L300*26", 116],
-            ["300X300X27", "L300*27", 121],
-            ["300X300X28", "L300*28", 125],
-            ["300X300X29", "L300*29", 129],
-            ["300X300X30", "L300*30", 133],
-            ["300X300X31", "L300*31", 138],
-            ["300X300X32", "L300*32", 142],
-            ["300X300X33", "L300*33", 146],
-            ["300X300X34", "L300*34", 150],
-            ["300X300X35", "L300*35", 154]
-        ];
-
-        // بناء كائن ANGLE_WEIGHTS من بيانات الجدول
-        for (const row of tableData) {
-            if (row.length < 3) continue;
-            
-            const designation = String(row[0]).toUpperCase().replace(/\*/g, 'X').replace(/\s+/g, '');
-            const profile = String(row[1]).toUpperCase().replace(/\*/g, 'X').replace(/\s+/g, '');
-            const weight = parseFloat(row[2]);
-
-            if (designation && !isNaN(weight)) {
-                ANGLE_WEIGHTS[designation] = weight;
-            }
-            if (profile && !isNaN(weight)) {
-                ANGLE_WEIGHTS[profile] = weight;
-            }
+        // دالة مساعدة لتسهيل إنشاء كائنات الأسئلة (لكي لا يطول الكود بشكل مفرط)
+        function q(text, opt, ans, lvl, type = "text", audio = "") {
+            return { q: text, options: opt, answer: ans, level: lvl, type: type, audioText: audio };
         }
 
-        // دالة للتعرف على أسماء المقاطع المختلفة
-        function normalizeSectionName(sectionName) {
-            if (!sectionName) return '';
-            let cleanSection = sectionName.toUpperCase().replace(/\s+/g, '').replace(/\*/g, 'X');
-            return cleanSection;
-        }
+        const A1 = "مبتدئ (A1)";
+        const A2 = "أساسي (A2)";
+        const B1 = "متوسط (B1)";
+        const B2 = "فوق المتوسط (B2)";
+        const C1 = "متقدم (C1)";
+        const C2 = "خبير (C2)";
 
-        // الوزن الطولي لكل متر (كجم/م) للمقاطع المختلفة
-        function getWeightPerMeter(sectionName) {
-            const normalizedSection = normalizeSectionName(sectionName);
-            
-            if (ANGLE_WEIGHTS[normalizedSection]) {
-                return ANGLE_WEIGHTS[normalizedSection];
-            }
-            
-            console.error(`لم يتم العثور على الوزن للقطاع: ${sectionName} (المعيار: ${normalizedSection})`);
-            showMessage(`Warning: Section ${sectionName} not found in database. Weight calculation may be inaccurate.`, 'error');
-            return 0;
-        }
+        const quizData = {
+            // 50 Grammar Questions
+            grammar: [
+                q("I ___ from Spain.", ["am", "is", "are", "be"], 0, A1),
+                q("She ___ apples.", ["like", "likes", "liking", "is like"], 1, A1),
+                q("___ you play tennis?", ["Do", "Does", "Are", "Is"], 0, A1),
+                q("My name ___ John.", ["am", "is", "are", "be"], 1, A1),
+                q("They ___ at home today.", ["is", "are", "am", "be"], 1, A1),
+                q("I ___ a sister.", ["has", "have", "having", "is having"], 1, A1),
+                q("Look at ___ bird!", ["that", "those", "these", "them"], 0, A1),
+                q("Where ___ he live?", ["do", "does", "is", "are"], 1, A1),
+                q("He ___ to the cinema yesterday.", ["go", "went", "gone", "going"], 1, A2),
+                q("We have ___ friends in London.", ["any", "much", "a lot of", "little"], 2, A2),
+                q("I am ___ than my brother.", ["tall", "taller", "tallest", "more tall"], 1, A2),
+                q("She ___ television every evening.", ["watch", "watches", "watching", "watched"], 1, A2),
+                q("I didn't ___ him.", ["saw", "see", "seen", "seeing"], 1, A2),
+                q("Are there ___ apples in the fridge?", ["some", "any", "much", "a"], 1, A2),
+                q("He is driving ___.", ["slow", "slower", "slowly", "slowest"], 2, A2),
+                q("Tomorrow, we ___ visit our grandmother.", ["are going to", "goes to", "going to", "went to"], 0, A2),
+                q("This is ___ book.", ["my", "mine", "me", "I"], 0, A2),
+                q("I was reading a book when the phone ___.", ["ring", "rang", "was ringing", "has rung"], 1, B1),
+                q("They have lived here ___ 2010.", ["since", "for", "in", "at"], 0, B1),
+                q("If I have time, I ___ you.", ["help", "will help", "helped", "would help"], 1, B1),
+                q("The house ___ built in 1990.", ["was", "is", "has", "had"], 0, B1),
+                q("Have you ___ been to Paris?", ["never", "ever", "yet", "still"], 1, B1),
+                q("I don't mind ___ early.", ["to wake up", "wake up", "waking up", "woke up"], 2, B1),
+                q("You ___ smoke in the hospital.", ["don't have to", "needn't", "mustn't", "wouldn't"], 2, B1),
+                q("She is the girl ___ won the race.", ["which", "who", "where", "whose"], 1, B1),
+                q("I haven't finished my homework ___.", ["already", "just", "yet", "still"], 2, B1),
+                q("She ___ me she was tired.", ["told", "said", "spoke", "talked"], 0, B2),
+                q("I'm not used ___ up early.", ["to wake", "waking", "to waking", "wake"], 2, B2),
+                q("By next week, I ___ the project.", ["will finish", "will have finished", "have finished", "am finishing"], 1, B2),
+                q("If I had known, I ___ to the party.", ["would go", "went", "would have gone", "had gone"], 2, B2),
+                q("He asked me where ___.", ["do I live", "I lived", "did I live", "I live"], 1, B2),
+                q("This time tomorrow, I ___ on the beach.", ["will lie", "will be lying", "am lying", "lie"], 1, B2),
+                q("Despite ___ tired, he kept working.", ["he was", "being", "to be", "was"], 1, B2),
+                q("The window ___ by the boys.", ["was broken", "broke", "has broken", "had broken"], 0, B2),
+                q("I'd rather you ___ here.", ["stay", "stayed", "to stay", "staying"], 1, B2),
+                q("Hardly ___ the door when the dog ran out.", ["I opened", "had I opened", "did I open", "I had opened"], 1, C1),
+                q("You had better ___ a doctor.", ["see", "to see", "seeing", "saw"], 0, C1),
+                q("I wish I ___ more money when I was younger.", ["saved", "had saved", "would save", "have saved"], 1, C1),
+                q("___ he arrive, please tell him to wait.", ["If", "Should", "When", "Unless"], 1, C1),
+                q("It's high time we ___.", ["leave", "left", "leaving", "had left"], 1, C1),
+                q("He is believed ___ the country.", ["to leave", "to have left", "leaving", "left"], 1, C1),
+                q("Never before ___ such a beautiful sunset.", ["I have seen", "have I seen", "did I see", "I saw"], 1, C1),
+                q("But for his help, I ___.", ["would fail", "will fail", "would have failed", "had failed"], 2, C1),
+                q("Not only ___ the window, but he also broke the door.", ["he broke", "did he break", "he had broken", "has he broken"], 1, C2),
+                q("It is imperative that he ___ on time.", ["is", "be", "will be", "was"], 1, C2),
+                q("___ for his advice, I would have failed.", ["If it wasn't", "Had it not been", "Were it not", "If he hasn't"], 1, C2),
+                q("So intense ___ the fire that the building collapsed.", ["was", "did", "had", "is"], 0, C2),
+                q("He acts as though he ___ the boss.", ["is", "were", "has been", "would be"], 1, C2),
+                q("Try ___ he might, he couldn't open the jar.", ["as", "though", "although", "even"], 0, C2),
+                q("Scarcely ___ the room when the phone rang.", ["did she enter", "she entered", "she had entered", "had she entered"], 3, C2)
+            ],
 
-        /**
-         * Converts weight from kg to metric tonnes (t) and formats to one decimal place.
-         * @param {number} kg - Weight in kilograms.
-         * @returns {string} Weight in tonnes with one decimal place.
-         */
-        function convertKgToTonneFormatted(kg) {
-            const tonnes = kg / 1000;
-            return tonnes.toFixed(1);
-        }
+            // 50 Vocabulary Questions
+            vocabulary: [
+                q("The opposite of 'big' is ___.", ["large", "small", "tall", "heavy"], 1, A1),
+                q("I sleep in the ___.", ["kitchen", "bathroom", "bedroom", "living room"], 2, A1),
+                q("The color of an apple is usually ___.", ["blue", "red", "black", "white"], 1, A1),
+                q("A dog has four ___.", ["arms", "hands", "legs", "wings"], 2, A1),
+                q("We use our eyes to ___.", ["hear", "smell", "see", "taste"], 2, A1),
+                q("Monday, Tuesday, ___.", ["Thursday", "Friday", "Wednesday", "Sunday"], 2, A1),
+                q("My father's father is my ___.", ["uncle", "brother", "grandfather", "nephew"], 2, A1),
+                q("You wear ___ on your feet.", ["gloves", "hats", "shirts", "shoes"], 3, A1),
+                q("I want to buy some ___ at the bakery.", ["meat", "bread", "milk", "apples"], 1, A2),
+                q("My mother's sister is my ___.", ["uncle", "cousin", "aunt", "niece"], 2, A2),
+                q("It's raining outside. Take your ___.", ["sunglasses", "umbrella", "sandals", "shorts"], 1, A2),
+                q("If you are sick, you go to a ___.", ["restaurant", "library", "hospital", "cinema"], 2, A2),
+                q("A pilot flies an ___.", ["car", "train", "airplane", "bicycle"], 2, A2),
+                q("Can I look at the ___, please? I want to order food.", ["menu", "bill", "recipe", "ticket"], 0, A2),
+                q("I need a ___ to cut the paper.", ["spoon", "fork", "knife", "scissors"], 3, A2),
+                q("The meal was ___. I loved it!", ["terrible", "awful", "delicious", "boring"], 2, A2),
+                q("Please ___ the door when you leave.", ["open", "close", "break", "hit"], 1, A2),
+                q("The train leaves from ___ 4.", ["platform", "port", "station", "stop"], 0, B1),
+                q("Can you ___ me some money?", ["borrow", "lend", "owe", "rent"], 1, B1),
+                q("She is very ___ and always tells the truth.", ["dishonest", "lazy", "honest", "shy"], 2, B1),
+                q("Let's ___ a table at the restaurant.", ["book", "buy", "take", "keep"], 0, B1),
+                q("He works as a ___ in a newspaper.", ["plumber", "journalist", "dentist", "butcher"], 1, B1),
+                q("It is completely ___ to smoke here.", ["forbidden", "allowed", "legal", "invited"], 0, B1),
+                q("We had a long ___ about politics.", ["argument", "discussion", "speech", "shout"], 1, B1),
+                q("Can I pay by credit ___?", ["cash", "coin", "card", "note"], 2, B1),
+                q("She gave me a very useful ___ of advice.", ["piece", "slice", "block", "drop"], 0, B1),
+                q("He was fired because his work was ___.", ["excellent", "outstanding", "inadequate", "superb"], 2, B2),
+                q("The company made a huge ___ this year.", ["profit", "benefit", "win", "gain"], 0, B2),
+                q("You need to ___ your fears if you want to succeed.", ["overcome", "overtake", "overlook", "overdo"], 0, B2),
+                q("The traffic was so heavily ___ that we were late.", ["congested", "crowded", "packed", "full"], 0, B2),
+                q("I can't ___ to buy a new car right now.", ["spend", "afford", "pay", "cost"], 1, B2),
+                q("She has a very ___ schedule.", ["tight", "narrow", "close", "thin"], 0, B2),
+                q("The meeting was ___ due to the manager's illness.", ["put off", "put out", "put up", "put down"], 0, B2),
+                q("We need to ___ a solution to this problem.", ["come up with", "come down to", "come across", "come over"], 0, B2),
+                q("He has a strong ___ of duty.", ["sense", "feeling", "thought", "mind"], 0, B2),
+                q("The new evidence will ___ his claim.", ["corroborate", "alleviate", "mitigate", "obliterate"], 0, C1),
+                q("She showed great ___ in dealing with the difficult customer.", ["tact", "tactics", "audacity", "apathy"], 0, C1),
+                q("The manager was criticized for his ___ attitude.", ["benevolent", "complacent", "diligent", "meticulous"], 1, C1),
+                q("His remarks were completely ___ to the current topic.", ["irrelevant", "invaluable", "indispensable", "intrinsic"], 0, C1),
+                q("The sudden loud noise ___ me.", ["startled", "soothed", "pacified", "appeased"], 0, C1),
+                q("He has a ___ for languages.", ["flair", "glare", "stare", "flare"], 0, C1),
+                q("The negotiations reached a ___.", ["stalemate", "checkmate", "teammate", "inmate"], 0, C1),
+                q("She is a ___ supporter of human rights.", ["staunch", "flimsy", "frail", "brittle"], 0, C1),
+                q("His speech was completely ___; nobody could understand his point.", ["incoherent", "lucid", "eloquent", "articulate"], 0, C2),
+                q("The smell of the ocean always evokes a feeling of ___.", ["nostalgia", "amnesia", "anesthesia", "insomnia"], 0, C2),
+                q("The dictator ruled with an iron fist, displaying extreme ___.", ["autocracy", "democracy", "anarchy", "philanthropy"], 0, C2),
+                q("His ___ behavior at the party offended everyone.", ["obnoxious", "decorous", "impeccable", "suave"], 0, C2),
+                q("The project was hindered by a ___ of administrative issues.", ["myriad", "paucity", "dearth", "scarcity"], 0, C2),
+                q("She delivered a ___ critique of the latest novel.", ["scathing", "flattering", "laudatory", "fawning"], 0, C2),
+                q("His arguments were entirely ___ and lacked evidence.", ["spurious", "veritable", "authentic", "genuine"], 0, C2)
+            ],
 
-        // --- GLOBAL STATE ---
-        let rawData = [];
-        let finalPlan = {};
-        let selectedOption = 'fixed';
+            // 50 Reading Questions
+            reading: [
+                q("\"No Parking.\" What does it mean?", ["You can park here", "You cannot leave your car here", "Parking is free", "Cars are sold here"], 1, A1),
+                q("\"Open 9 AM to 5 PM.\" The shop is open ___.", ["in the evening", "at night", "during the day", "always"], 2, A1),
+                q("\"Please be quiet.\" You should ___.", ["shout", "speak loudly", "not make noise", "sing"], 2, A1),
+                q("\"Push.\" On a door, this means you should ___.", ["pull it towards you", "press it away from you", "slide it", "lock it"], 1, A1),
+                q("\"Exit.\" This shows where you can ___.", ["enter", "eat", "leave", "sit"], 2, A1),
+                q("\"Women.\" On a door, this is a restroom for ___.", ["men", "females", "children", "dogs"], 1, A1),
+                q("\"Stop.\" Drivers must ___.", ["go faster", "halt the car", "turn left", "honk"], 1, A1),
+                q("\"No Smoking.\" You cannot ___ here.", ["eat food", "drink water", "smoke cigarettes", "take photos"], 2, A1),
+                q("\"Keep off the grass.\" You should ___.", ["walk on the grass", "not walk on the grass", "water the grass", "cut the grass"], 1, A2),
+                q("\"Tickets must be validated before boarding.\" When do you validate it?", ["After the trip", "During the trip", "Before getting on", "On the train"], 2, A2),
+                q("\"Beware of the dog.\" This means the dog is ___.", ["friendly", "dangerous", "sleeping", "small"], 1, A2),
+                q("\"Please pay at the cash desk.\" Where do you give money?", ["At the table", "To the chef", "At the register", "Outside"], 2, A2),
+                q("\"Do not feed the animals.\" You shouldn't ___.", ["touch them", "look at them", "give them food", "take their pictures"], 2, A2),
+                q("\"Fragile - Handle with care.\" The item inside is ___.", ["strong", "heavy", "easily broken", "cheap"], 2, A2),
+                q("\"Out of bounds.\" You are ___ to go there.", ["allowed", "not permitted", "forced", "invited"], 1, A2),
+                q("\"Insert coin to begin.\" To start, you must ___.", ["press a button", "put money in", "say hello", "wait"], 1, A2),
+                q("\"Wet Paint.\" You shouldn't ___.", ["smell it", "drink it", "touch it", "look at it"], 2, A2),
+                q("\"Out of order.\" The machine is ___.", ["working fine", "broken", "new", "empty"], 1, B1),
+                q("\"Do not leave luggage unattended.\" You must ___.", ["leave your bags", "stay with your bags", "hide your bags", "carry others' bags"], 1, B1),
+                q("\"Postponed until further notice.\" The event is ___.", ["happening now", "canceled forever", "delayed", "finished"], 2, B1),
+                q("\"Admission: Adults $10, Children Free.\" How much does a child pay?", ["$10", "$5", "Nothing", "$20"], 2, B1),
+                q("\"Please retain your receipt as proof of purchase.\" You should ___ it.", ["throw", "keep", "burn", "eat"], 1, B1),
+                q("\"This offer is valid until Monday.\" On Tuesday, the offer is ___.", ["good", "expired", "new", "better"], 1, B1),
+                q("\"Staff only beyond this point.\" Who can pass?", ["Anyone", "Customers", "Employees", "Children"], 2, B1),
+                q("\"May contain traces of nuts.\" People with nut allergies should ___.", ["eat it quickly", "avoid it", "cook it", "drink it"], 1, B1),
+                q("\"No trespassing.\" You are on ___ property.", ["public", "private", "government", "open"], 1, B1),
+                q("\"The warranty is void if the seal is broken.\" You will lose it if you ___.", ["open the item", "return the item", "keep the seal intact", "use the item"], 0, B2),
+                q("\"Subject to availability.\" You can get it ___.", ["always", "if it is in stock", "never", "only tomorrow"], 1, B2),
+                q("\"Prior experience is mandatory.\" You ___ have experience for this job.", ["must", "should", "might", "needn't"], 0, B2),
+                q("\"Please refrain from smoking.\" You are asked to ___.", ["smoke inside", "stop smoking", "buy cigarettes", "smoke outside"], 1, B2),
+                q("\"Management reserves the right of admission.\" They can ___ you entry.", ["guarantee", "sell", "deny", "force"], 2, B2),
+                q("\"Proceeds go to charity.\" The money earned is ___.", ["kept by the owners", "donated", "lost", "taxed"], 1, B2),
+                q("\"Terms and conditions apply.\" The offer is ___.", ["unconditional", "subject to rules", "fake", "unlimited"], 1, B2),
+                q("\"Trespassers will be prosecuted.\" Intruders will face ___.", ["a warm welcome", "legal action", "no consequences", "a tour"], 1, B2),
+                q("\"All sales are final.\" You cannot ___ the item.", ["use", "buy", "return or exchange", "keep"], 2, B2),
+                q("\"The contract is legally binding.\" You ___ the contract.", ["can ignore", "must obey", "can change", "must write"], 1, C1),
+                q("\"Any infringement will be prosecuted.\" If you break rules, you face ___.", ["legal action", "a reward", "no consequences", "a promotion"], 0, C1),
+                q("\"The findings are highly ambiguous.\" The results are ___.", ["very clear", "unclear", "false", "accurate"], 1, C1),
+                q("\"The policy is subject to intermittent review.\" It is reviewed ___.", ["constantly", "never", "occasionally", "annually"], 2, C1),
+                q("\"Participation is strictly voluntary.\" You ___ join.", ["are forced to", "are not obligated to", "must not", "cannot"], 1, C1),
+                q("\"His speech was fraught with contradictions.\" His speech was ___.", ["very clear", "full of inconsistencies", "empty", "silent"], 1, C1),
+                q("\"The evidence is circumstantial.\" The proof is ___.", ["direct and absolute", "indirect", "fake", "overwhelming"], 1, C1),
+                q("\"The effects are largely negligible.\" The impact is ___.", ["huge", "significant", "insignificant", "dangerous"], 2, C1),
+                q("\"Subject to an arbitrary interpretation.\" The interpretation can be ___.", ["logical", "random and unjustified", "strict", "legal"], 1, C2),
+                q("\"The author's tone was entirely facetious.\" The author was being ___.", ["serious", "humorous and not serious", "angry", "sad"], 1, C2),
+                q("\"This issue is peripheral to our main goal.\" The issue is ___.", ["central", "unimportant", "crucial", "helpful"], 1, C2),
+                q("\"The agreement was rendered null and void.\" It is now ___.", ["stronger", "invalid", "renewed", "permanent"], 1, C2),
+                q("\"He showed a blatant disregard for the rules.\" His disobedience was ___.", ["subtle", "obvious and shameless", "accidental", "apologetic"], 1, C2),
+                q("\"The argument is fundamentally fallacious.\" The reasoning is ___.", ["sound", "flawed", "brilliant", "perfect"], 1, C2),
+                q("\"Their approach to the crisis was completely pragmatic.\" They were ___.", ["idealistic", "practical", "emotional", "panicked"], 1, C2)
+            ],
 
-        // --- UI UTILITIES ---
-        const fileInput = document.getElementById('excel-file');
-        const calculateBtn = document.getElementById('calculate-btn');
-        const loadingIndicator = document.getElementById('loading-indicator');
-        const messageBox = document.getElementById('message-box');
-        const outputArea = document.getElementById('output-area');
-        const downloadControls = document.getElementById('download-controls');
+            // 50 Listening Questions
+            listening: [
+                q("Listen and choose the correct answer.", ["She is from the USA.", "She is from Canada.", "She is from the UK.", "She is from Australia."], 1, A1, "listening", "Hello, I am Sarah. I am from Canada."),
+                q("What is the man's job?", ["Teacher", "Doctor", "Bus driver", "Police officer"], 2, A1, "listening", "I drive a bus every day in the city."),
+                q("What time is the meeting?", ["2:00 PM", "3:00 PM", "4:00 PM", "5:00 PM"], 1, A1, "listening", "Don't forget, our meeting is at 3:00 PM."),
+                q("How does the boy feel?", ["Happy", "Sad", "Angry", "Tired"], 3, A1, "listening", "I want to sleep. I worked all day."),
+                q("What is she drinking?", ["Coffee", "Tea", "Water", "Juice"], 1, A1, "listening", "This green tea is very hot."),
+                q("Where are they?", ["At school", "At a restaurant", "In a hospital", "At the park"], 1, A1, "listening", "Can I see the menu, please?"),
+                q("What day is tomorrow?", ["Monday", "Friday", "Sunday", "Saturday"], 3, A1, "listening", "Today is Friday, so tomorrow is the weekend!"),
+                q("What is his name?", ["Tom", "John", "Mark", "David"], 1, A1, "listening", "Nice to meet you, my name is John."),
+                q("How much are the shoes?", ["$14", "$40", "$44", "$100"], 1, A2, "listening", "These shoes are on sale for 40 dollars."),
+                q("What did the woman buy?", ["Only bread", "Bread and two cakes", "Milk and bread", "Two cakes only"], 1, A2, "listening", "I went to the bakery and bought some fresh bread and two cakes."),
+                q("Where is the post office?", ["Next to the bank", "Behind the bank", "Opposite the bank", "Next to the park"], 0, A2, "listening", "Go straight, turn left at the corner, and it's next to the bank."),
+                q("What is the weather like?", ["Raining", "Sunny", "Snowing", "Windy"], 0, A2, "listening", "Take an umbrella, it's pouring outside!"),
+                q("When is her birthday?", ["May 1st", "May 5th", "May 15th", "March 5th"], 1, A2, "listening", "My birthday is on the fifth of May."),
+                q("What color is his new car?", ["Red", "Blue", "Black", "White"], 2, A2, "listening", "I sold my red car and bought a black one."),
+                q("How does he get to work?", ["By bus", "By train", "He walks", "By car"], 1, A2, "listening", "I usually take the train because driving is too stressful."),
+                q("What does she want for dinner?", ["Pizza", "Chicken", "Fish", "Salad"], 0, A2, "listening", "Let's just order a pizza tonight, I'm too tired to cook."),
+                q("Who is she calling?", ["Her doctor", "Her boss", "Her sister", "Her mother"], 1, A2, "listening", "Hi Mr. Smith, I won't be able to come to the office today."),
+                q("Why was John late?", ["He woke up late", "There was heavy traffic", "His car broke down", "He missed the bus"], 2, B1, "listening", "I'm sorry I'm late. My car broke down on the highway."),
+                q("What are they planning to do?", ["Go shopping", "Go to the beach", "Go hiking", "Stay at home"], 2, B1, "listening", "If it doesn't rain tomorrow, let's go hiking in the mountains."),
+                q("What does the speaker think of the movie?", ["He hated everything", "He liked the plot but not the acting", "He liked the acting but found the plot confusing", "He thought it was perfect"], 2, B1, "listening", "The plot was a bit confusing, but the acting was absolutely brilliant."),
+                q("What is the main topic of the announcement?", ["A flight cancellation", "A flight delay", "A gate change", "Lost baggage"], 1, B1, "listening", "Attention passengers, flight 402 to London has been delayed due to severe weather conditions."),
+                q("Why did she quit her job?", ["Low salary", "Bad boss", "Long hours", "Moved to a new city"], 2, B1, "listening", "The pay was great, but I couldn't handle working 60 hours a week anymore."),
+                q("What is the problem with the hotel room?", ["It's too small", "It's dirty", "The AC is broken", "It's noisy"], 2, B1, "listening", "Excuse me, the air conditioning in room 305 isn't working."),
+                q("What does he suggest doing?", ["Eating out", "Cooking at home", "Watching a movie", "Going for a walk"], 1, B1, "listening", "Why don't we buy some ingredients and make pasta instead of going to a restaurant?"),
+                q("What did she lose?", ["Her phone", "Her wallet", "Her keys", "Her passport"], 2, B1, "listening", "I can't get into my apartment! I must have dropped them somewhere."),
+                q("How long has he been studying French?", ["2 months", "2 years", "5 years", "10 years"], 1, B1, "listening", "I started taking classes a couple of years ago, but I'm still not fluent."),
+                q("What is the speaker implying?", ["He helped with the project.", "He wasn't asked to help.", "He refused to help.", "He didn't know how to help."], 1, B2, "listening", "I would have helped you with the project if you had only asked."),
+                q("What is the manager's concern?", ["Hiring new staff", "Reducing expenses", "Increasing production", "Opening a new branch"], 1, B2, "listening", "We need to cut down on expenses immediately, otherwise, we'll face serious cash flow issues next quarter."),
+                q("How does the woman feel about the new policy?", ["Excited", "Indifferent", "Disappointed", "Confused"], 2, B2, "listening", "Frankly, I find the new remote work policy quite restrictive compared to what we were promised."),
+                q("What can be inferred from the conversation?", ["He is unqualified for the job.", "His practical work is impressive despite his lack of formal qualifications.", "He should improve his portfolio.", "He talks too much about his capabilities."], 1, B2, "listening", "He might not have the qualifications on paper, but his portfolio speaks volumes about his capabilities."),
+                q("What is her attitude towards the deadline?", ["It's unachievable", "It's generous", "It's reasonable", "It's irrelevant"], 0, B2, "listening", "Unless they hire three more people, expecting this by Friday is just a pipe dream."),
+                q("Why is the product launch delayed?", ["Technical bugs", "Marketing issues", "Lack of funding", "Competitor action"], 0, B2, "listening", "We had to push back the release date because QA found a critical flaw in the software code."),
+                q("What does he think of the training session?", ["It was highly informative", "It was a waste of time", "It was too difficult", "It was too short"], 1, B2, "listening", "To be honest, I could have learned all of that from a ten-minute YouTube video."),
+                q("What is the main advice given?", ["Take risks", "Be cautious", "Invest heavily", "Ignore the market"], 1, B2, "listening", "In this volatile market, it's prudent to keep your assets diversified and avoid putting all your eggs in one basket."),
+                q("How did they resolve the conflict?", ["Through arbitration", "By compromising", "By firing someone", "They didn't resolve it"], 1, B2, "listening", "We eventually met in the middle; I gave up the corner office, and they agreed to the flexible hours."),
+                q("What is the speaker's main argument?", ["Renewable energy is too expensive.", "The long-term benefits outweigh the initial costs.", "Fossil fuels are more economical.", "Environmental dividends are hard to prove."], 1, C1, "listening", "While renewable energy sources require high initial investment, their long-term economic and environmental dividends are indisputable."),
+                q("How would you describe the speaker's tone?", ["Enthusiastic", "Sarcastic", "Objective", "Sympathetic"], 1, C1, "listening", "Oh, fantastic! Another meeting that could have easily been an email. Just what my schedule needed."),
+                q("What is meant by the phrase used?", ["We have fully understood it.", "We have only just begun to explore it.", "It is a superficial topic.", "It is causing scratches on the surface."], 1, C1, "listening", "I think we're just scratching the surface of what artificial intelligence can achieve in healthcare."),
+                q("What is the core issue discussed?", ["Employee retention", "Market saturation", "Supply chain disruption", "Legal compliance"], 2, C1, "listening", "The bottleneck isn't in manufacturing, it's the logistical nightmare of getting the raw materials through customs on time."),
+                q("What does she mean by her comment?", ["The strategy was brilliant", "The strategy was poorly executed", "The strategy looked good only in theory", "The strategy was never written down"], 2, C1, "listening", "It was a brilliant strategy on paper, but it completely failed to account for human psychology during the implementation phase."),
+                q("How does he view the current leadership?", ["Visionary", "Incompetent", "Micro-managing", "Hands-off"], 2, C1, "listening", "The problem at the top is that they are so obsessed with the minutiae that they're completely losing sight of the macro vision."),
+                q("What is the underlying cause of the failure?", ["Lack of funds", "Poor communication", "Technological obsolescence", "Resistance to change"], 3, C1, "listening", "You can introduce the most cutting-edge tools available, but if the corporate culture remains stubbornly entrenched in its old ways, adaptation is doomed."),
+                q("What is the speaker implying about the statistics?", ["They are completely fake", "They are 100% accurate", "They are being manipulated", "They are irrelevant"], 2, C1, "listening", "Statistics are like a ventriloquist's dummy; you can make them say whatever supports your pre-existing narrative if you twist them hard enough."),
+                q("What is the underlying premise?", ["Digital media lasts forever.", "We need new methods to preserve short-lived digital content.", "Archival preservation is no longer necessary.", "Paradigm shifts are ephemeral."], 1, C2, "listening", "The ephemeral nature of digital media necessitates a paradigm shift in how we approach archival preservation."),
+                q("What attitude does the speaker convey regarding the economic forecast?", ["Pessimistic but realistic", "Blindly optimistic", "Completely indifferent", "Highly enthusiastic"], 0, C2, "listening", "To suggest a rapid recovery is, frankly, overly optimistic, given the systemic fragilities that remain unaddressed."),
+                q("Interpret the speaker's metaphor.", ["They were literal dancers.", "The situation was extremely precarious and required careful balance.", "They were ignoring the ground.", "It was a fun and easy process."], 1, C2, "listening", "The negotiations were a delicate dance on a tightrope, with neither side willing to look down."),
+                q("What is the speaker's critique of the policy?", ["It is too harsh", "It treats the symptom, not the disease", "It is perfectly designed", "It is too expensive"], 1, C2, "listening", "Implementing these superficial austerity measures is akin to putting a band-aid on a gaping wound; it wholly ignores the underlying structural deficits."),
+                q("How does the author view the protagonist's actions?", ["As purely heroic", "As morally ambiguous", "As cowardly", "As irrelevant"], 1, C2, "listening", "His actions, rather than stemming from altruism, are steeped in a Machiavellian pragmatism that leaves the reader questioning his true moral compass."),
+                q("What does the speaker mean by 'cognitive dissonance' in this context?", ["Lack of intelligence", "Mental discomfort from holding conflicting beliefs", "Clear understanding", "Auditory hallucination"], 1, C2, "listening", "The public's demand for cheaper goods while simultaneously protesting unethical labor practices is a textbook display of collective cognitive dissonance."),
+                q("What is the essence of her argument regarding technology?", ["It connects us deeply", "It creates an illusion of connection", "It destroys society completely", "It has no impact"], 1, C2, "listening", "We are living in an era of hyper-connectivity that ironically breeds a profound, insidious sense of isolation; we are alone together.")
+            ],
 
-        // Function to select raw material length option
-        function selectOption(option) {
-            selectedOption = option;
-            
-            const fixedOption = document.getElementById('fixed-option');
-            const variableOption = document.getElementById('variable-option');
-            
-            if (option === 'fixed') {
-                fixedOption.classList.add('selected');
-                variableOption.classList.remove('selected');
-                document.getElementById('fixed-length').checked = true;
-            } else {
-                fixedOption.classList.remove('selected');
-                variableOption.classList.add('selected');
-                document.getElementById('variable-length').checked = true;
-            }
-            
-            outputArea.classList.add('hidden');
-            downloadControls.classList.add('hidden');
-        }
+            // 50 Writing Questions
+            writing: [
+                q("Choose the correct spelling:", ["Wensday", "Wednesday", "Wendsday", "Whensday"], 1, A1),
+                q("Which sentence is correct?", ["I has a car.", "I have a car.", "I having a car.", "I am have a car."], 1, A1),
+                q("Choose the correct punctuation:", ["Where are you going.", "Where are you going?", "Where are you going!", "Where are you going,"], 1, A1),
+                q("Which is correct?", ["My name are John.", "My name is John.", "My name am John.", "My name John is."], 1, A1),
+                q("Choose the correct word:", ["I am from spane.", "I am from Spain.", "I am from spain.", "I are from Spain."], 1, A1),
+                q("Which sentence is negative?", ["I like apples.", "I don't like apples.", "Do I like apples?", "Apples I like."], 1, A1),
+                q("Correct the sentence: 'he is tall'", ["He is tall.", "He is tall", "he is tall.", "He Is Tall."], 0, A1),
+                q("Which is the correct question format?", ["You are happy?", "Are you happy.", "Are you happy?", "Happy are you?"], 2, A1),
+                q("Complete the sentence: 'She is a doctor. ___ works in a hospital.'", ["He", "They", "She", "It"], 2, A2),
+                q("Which word is the odd one out?", ["Apple", "Banana", "Carrot", "Chair"], 3, A2),
+                q("Choose the correct order:", ["I usually play tennis on Sundays.", "I play usually tennis on Sundays.", "Usually I play on Sundays tennis.", "I play tennis on Sundays usually."], 0, A2),
+                q("Choose the best connector: I like tea, ___ I don't like coffee.", ["and", "because", "but", "so"], 2, A2),
+                q("Choose the correct spelling:", ["Beautiful", "Beatifull", "Beautifull", "Beatiful"], 0, A2),
+                q("Which sentence is in the past tense?", ["I am walking.", "I walk.", "I walked.", "I will walk."], 2, A2),
+                q("Choose the correct sentence:", ["There is two books.", "There are two books.", "There are a book.", "There is books."], 1, A2),
+                q("Complete: 'I didn't go to work ___ I was sick.'", ["and", "but", "because", "so"], 2, A2),
+                q("Which is correct?", ["I go to the school in bus.", "I go to school by bus.", "I go to school with bus.", "I go to school on bus."], 1, A2),
+                q("Which sentence has correct capitalization?", ["i live in paris.", "I live in Paris.", "I Live In Paris.", "i live in Paris."], 1, B1),
+                q("Choose the best connector: 'I was tired, ___ I went to bed early.'", ["because", "but", "so", "although"], 2, B1),
+                q("Which sentence is correctly punctuated?", ["My brother, who lives in London is a teacher.", "My brother who lives in London, is a teacher.", "My brother, who lives in London, is a teacher.", "My brother who lives in London is a teacher,"], 2, B1),
+                q("Identify the incorrect sentence:", ["She enjoys to read books.", "She enjoys reading books.", "He wants to learn French.", "They decided to stay home."], 0, B1),
+                q("Choose the correct formal greeting:", ["Hey John,", "Dear Mr. Smith,", "Hi boss,", "What's up Smith,"], 1, B1),
+                q("Complete: 'I am looking forward ___ you.'", ["to see", "to seeing", "seeing", "see"], 1, B1),
+                q("Which sentence uses an adjective correctly?", ["He drives very fast.", "He drives very fastly.", "He is a fastly driver.", "He driving fast."], 0, B1),
+                q("Select the correct indirect speech: 'I am tired,' he said.", ["He said that he is tired.", "He said that he was tired.", "He says that he is tired.", "He told he was tired."], 1, B1),
+                q("Choose the best word: 'She gave a very good ___ at the meeting.'", ["present", "presentation", "presenting", "presented"], 1, B1),
+                q("Choose the most formal sign-off for a business letter:", ["Cheers,", "Best,", "Yours sincerely,", "Catch you later,"], 2, B2),
+                q("Which sentence uses the passive voice correctly?", ["The cake was eat by him.", "The cake was eaten by him.", "The cake is ate by him.", "The cake ate by him."], 1, B2),
+                q("Select the sentence with parallel structure:", ["She likes reading, writing, and to swim.", "She likes reading, to write, and swimming.", "She likes to read, writing, and to swim.", "She likes reading, writing, and swimming."], 3, B2),
+                q("Which word best completes the formal request: 'I would be ___ if you could send the report by Friday.'", ["happy", "grateful", "glad", "pleased"], 1, B2),
+                q("Which is a correct conditional sentence?", ["If I will win, I will buy a car.", "If I win, I buy a car.", "If I win, I will buy a car.", "If I won, I will buy a car."], 2, B2),
+                q("Choose the correct linking word to show contrast:", ["Therefore", "Furthermore", "However", "Consequently"], 2, B2),
+                q("Identify the run-on sentence:", ["I like apples, but I hate bananas.", "I like apples I hate bananas.", "Because I like apples, I eat them.", "I like apples; I hate bananas."], 1, B2),
+                q("Which sentence expresses a regret about the past?", ["I wish I study harder.", "I wish I have studied harder.", "I wish I had studied harder.", "I wish I studied harder."], 2, B2),
+                q("Choose the correct spelling:", ["Accommodate", "Acommodate", "Accomodate", "Acomodate"], 0, B2),
+                q("Identify the correct use of an apostrophe:", ["The dogs bone is here.", "The dog's bone is here.", "The dogs's bone is here.", "The dog is bone here."], 1, C1),
+                q("Which sentence conveys a hypothetical past situation?", ["If I have time, I will go.", "If I had time, I would go.", "If I had had time, I would have gone.", "If I have had time, I go."], 2, C1),
+                q("Choose the best transition word: 'The experiment failed; ___, we must revise our methodology.'", ["however", "consequently", "nevertheless", "similarly"], 1, C1),
+                q("Which sentence is structurally correct?", ["Hardly I had sat down when the bell rang.", "Hardly had I sat down when the bell rang.", "Hardly I sat down when the bell rang.", "Hardly had I sat down than the bell rang."], 1, C1),
+                q("Identify the sentence with correct subject-verb agreement:", ["The committee have decided.", "A number of issues has been raised.", "Neither of the options are good.", "The team of experts is arriving tomorrow."], 3, C1),
+                q("Which word emphasizes the degree of an adjective?", ["Absolutely good", "Very enormous", "Extremely excellent", "Highly unlikely"], 3, C1),
+                q("Identify the dangling modifier:", ["Walking down the street, the trees were beautiful.", "Walking down the street, I saw beautiful trees.", "As I walked down the street, the trees were beautiful.", "I saw beautiful trees walking down the street."], 0, C1),
+                q("Choose the correct relative pronoun use:", ["The man, that lives next door, is nice.", "The man who lives next door is nice.", "The man which lives next door is nice.", "The man, whom lives next door, is nice."], 1, C1),
+                q("Which is a compound-complex sentence?", ["Although I like apples, I prefer bananas, and I eat them daily.", "I like apples.", "I like apples, but I prefer bananas.", "Because I like apples, I eat them."], 0, C2),
+                q("Identify the sentence with correct subjunctive mood:", ["I suggest that he goes to the doctor.", "I suggest that he go to the doctor.", "I suggest that he going to the doctor.", "I suggest that he went to the doctor."], 1, C2),
+                q("Which phrase best demonstrates concise academic writing?", ["Due to the fact that it was raining, the event was cancelled.", "Because of the rain, the event was cancelled.", "In light of the rainy weather conditions, the event was cancelled.", "The rain caused the cancellation of the event."], 3, C2),
+                q("Identify the cleft sentence emphasizing the subject:", ["John broke the window.", "The window was broken by John.", "It was John who broke the window.", "What John broke was the window."], 2, C2),
+                q("Choose the option that avoids nominalization:", ["The realization of the project was successful.", "We realized the project successfully.", "The making of the project was a success.", "The successful realization was done by us."], 1, C2),
+                q("Which sentence correctly uses an absolute phrase?", ["The sun having set, we walked home.", "Having set the sun, we walked home.", "The sun had set, we walked home.", "Because the sun having set, we walked home."], 0, C2),
+                q("Identify the rhetorically most emphatic sentence:", ["He didn't say a single word.", "Not a single word did he say.", "A single word wasn't said by him.", "He said not a single word."], 1, C2)
+            ]
+        };
 
-        fileInput.addEventListener('change', () => {
-            calculateBtn.disabled = fileInput.files.length === 0;
-            if (fileInput.files.length > 0) {
-                showMessage('File ready to be processed. Click "Generate Cutting Plan".', 'info');
-            } else {
-                hideMessage();
-            }
-            outputArea.classList.add('hidden');
-            downloadControls.classList.add('hidden');
+        // تجميع قائمة "كل المهارات" لأخذ مزيج (10 من كل قسم = 50 سؤال شامل متدرج الصعوبة)
+        quizData.all = [];
+        ['grammar', 'vocabulary', 'reading', 'listening', 'writing'].forEach(cat => {
+            const data = quizData[cat];
+            // نأخذ عينات من جميع المستويات الستة (المجموع 10 أسئلة لكل مهارة)
+            quizData.all.push(
+                data[0], data[4],   // 2 from A1
+                data[9], data[13],  // 2 from A2
+                data[18], data[22], // 2 from B1
+                data[27], data[31], // 2 from B2
+                data[36],           // 1 from C1
+                data[45]            // 1 from C2
+            );
         });
 
-        function showMessage(text, type = 'error') {
-            messageBox.textContent = text;
-            messageBox.className = 'mt-4 p-3 rounded-lg text-sm';
-            messageBox.classList.remove('hidden');
+        let selectedCategoryKey = null;
+        let currentQuestions = [];
+        let currentIndex = 0;
+        let score = 0;
+        let selectedOption = null;
 
-            if (type === 'error') {
-                messageBox.classList.add('bg-red-100', 'text-red-800');
-            } else if (type === 'success') {
-                messageBox.classList.add('bg-green-100', 'text-green-800');
+        function selectCategory(category) {
+            selectedCategoryKey = category;
+            
+            // تمييز الزر المختار
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                btn.classList.remove('border-blue-500', 'bg-blue-50', 'text-blue-700');
+            });
+            event.currentTarget.classList.add('border-blue-500', 'bg-blue-50', 'text-blue-700');
+            
+            // تفعيل زر البدء
+            const startBtn = document.getElementById('start-btn');
+            startBtn.disabled = false;
+            startBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+        }
+
+        function startQuiz() {
+            if (!selectedCategoryKey) return;
+            
+            currentQuestions = quizData[selectedCategoryKey];
+            document.getElementById('setup-screen').classList.add('hidden');
+            document.getElementById('quiz-screen').classList.remove('hidden');
+            
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            const q = currentQuestions[currentIndex];
+            const totalQuestions = currentQuestions.length;
+            
+            // تحديث الواجهة
+            document.getElementById('question-counter').innerText = `السؤال ${currentIndex + 1} من ${totalQuestions}`;
+            document.getElementById('difficulty-badge').innerText = q.level;
+            
+            // تغيير لون البادج بناء على المستوى
+            const badge = document.getElementById('difficulty-badge');
+            badge.className = "px-2 py-1 rounded text-xs font-bold ";
+            if(q.level.includes("A1") || q.level.includes("A2")) badge.className += "bg-green-100 text-green-800";
+            else if(q.level.includes("B1") || q.level.includes("B2")) badge.className += "bg-yellow-100 text-yellow-800";
+            else badge.className += "bg-red-100 text-red-800";
+
+            document.getElementById('progress-bar').style.width = `${((currentIndex) / totalQuestions) * 100}%`;
+            document.getElementById('question-text').innerText = `${currentIndex + 1}. ${q.q}`;
+            
+            // إظهار أو إخفاء زر الصوت
+            const audioBtn = document.getElementById('audio-btn');
+            if (q.type === 'listening') {
+                audioBtn.classList.remove('hidden');
             } else {
-                messageBox.classList.add('bg-blue-100', 'text-blue-800');
-            }
-        }
-
-        function hideMessage() {
-            messageBox.classList.add('hidden');
-        }
-
-        function showLoading(show = true) {
-            loadingIndicator.classList.toggle('hidden', !show);
-            calculateBtn.disabled = show;
-        }
-
-        // --- DATA INPUT & PARSING ---
-
-        function processFile() {
-            const file = fileInput.files[0];
-            if (!file) {
-                showMessage('Please select an Excel file first.', 'error');
-                return;
-            }
-
-            showLoading(true);
-            hideMessage();
-            outputArea.classList.add('hidden');
-            downloadControls.classList.add('hidden');
-
-            const reader = new FileReader();
-
-            reader.onload = function(e) {
-                try {
-                    const data = new Uint8Array(e.target.result);
-                    const workbook = XLSX.read(data, { type: 'array' });
-                    const sheetName = workbook.SheetNames[0];
-                    const worksheet = workbook.Sheets[sheetName];
-                    const json = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-
-                    rawData = parseAndValidateData(json);
-
-                    if (rawData.length === 0) {
-                        showMessage('File processed, but no valid data found or headers are incorrect. Check that columns A-E contain data (Section, Item/Ref, Length(mm), Qty, Steel Grade).', 'error');
-                        showLoading(false);
-                        return;
-                    }
-
-                    finalPlan = runOptimization(rawData);
-                    renderReports(finalPlan);
-                    outputArea.classList.remove('hidden');
-                    downloadControls.classList.remove('hidden');
-                    showMessage(`Optimization complete. Processed ${rawData.length} total piece requirements using Best Fit Decreasing (BFD).`, 'success');
-
-                } catch (error) {
-                    console.error('Error processing file:', error);
-                    showMessage(`Error processing file: ${error.message}. Ensure it is a valid .xlsx format.`, 'error');
-                } finally {
-                    showLoading(false);
-                }
-            };
-
-            reader.readAsArrayBuffer(file);
-        }
-        
-        function parseAndValidateData(json) {
-            const parsedData = [];
-            for (let i = 1; i < json.length; i++) {
-                const row = json[i];
-                if (row.length < 5) continue;
-
-                const section = String(row[0] || '').trim();
-                const item = String(row[1] || '').trim();
-                const length_mm = parseFloat(String(row[2] || '0').trim());
-                const quantity = parseInt(String(row[3] || '0').trim());
-                const steel = String(row[4] || '').trim();
-
-                const isValid = section.startsWith('L') &&
-                                !isNaN(length_mm) && length_mm > 0 &&
-                                !isNaN(quantity) && quantity > 0 &&
-                                steel.length > 0;
-
-                if (isValid) {
-                    for (let q = 0; q < quantity; q++) {
-                        parsedData.push({
-                            id: `${section}-${steel}-${i}-${q}`,
-                            section: section,
-                            item: item || 'GENERIC',
-                            length: length_mm,
-                            steel: steel
-                        });
-                    }
-                }
-            }
-            return parsedData;
-        }
-
-        // --- CORE OPTIMIZATION LOGIC ---
-
-        function runOptimization(data) {
-            const groups = data.reduce((acc, item) => {
-                const key = `${item.section}|${item.steel}`;
-                if (!acc[key]) {
-                    acc[key] = { 
-                        section: item.section, 
-                        steel: item.steel, 
-                        pieces: [],
-                        weightPerMeter: getWeightPerMeter(item.section)
-                    };
-                }
-                acc[key].pieces.push(item);
-                return acc;
-            }, {});
-
-            const results = {
-                summary: [],
-                detailed: {},
-                scrap: [],
-                overall: { 
-                    netWeight_kg: 0, 
-                    rawMaterialWeight_kg: 0,
-                    totalEfficiency: 0, 
-                    groupCount: 0 
-                }
-            };
-
-            for (const key in groups) {
-                const group = groups[key];
-                const pieces = group.pieces;
-                const totalRequiredLength = pieces.reduce((sum, p) => sum + p.length, 0);
-
-                let optimalPlan;
-                
-                if (selectedOption === 'fixed') {
-                    optimalPlan = findBestFitFixedLength(pieces, FIXED_LENGTH);
-                } else {
-                    optimalPlan = findBestFitMultiLength(pieces);
-                }
-                
-                const totalRawLengthUsed = optimalPlan.rawBars.reduce((sum, bar) => sum + bar.rawLength, 0);
-                
-                const netWeight_kg = (totalRequiredLength / 1000) * group.weightPerMeter;
-                const rawMaterialWeight_kg = (totalRawLengthUsed / 1000) * group.weightPerMeter;
-                const efficiency = rawMaterialWeight_kg > 0 ? (netWeight_kg / rawMaterialWeight_kg) * 100 : 0;
-                
-                const rawLengthCounts = optimalPlan.rawBars.filter(b => b.rawLength > 0).reduce((acc, bar) => {
-                    acc[bar.rawLength] = (acc[bar.rawLength] || 0) + 1;
-                    return acc;
-                }, {});
-
-                const rawLengthsUsedSummary = Object.keys(rawLengthCounts).map(len => ({
-                    length_mm: parseFloat(len),
-                    count: rawLengthCounts[len]
-                })).sort((a, b) => b.length_mm - a.length_mm);
-
-                const totalBarsNeeded = optimalPlan.rawBars.filter(b => b.rawLength > 0).length;
-
-                results.summary.push({
-                    section: group.section,
-                    steel: group.steel,
-                    weightPerMeter: group.weightPerMeter,
-                    rawLengthsUsed: rawLengthsUsedSummary,
-                    rawBarsNeeded: totalBarsNeeded,
-                    netWeight_kg: netWeight_kg,
-                    rawMaterialWeight_kg: rawMaterialWeight_kg,
-                    efficiency: efficiency
-                });
-                
-                results.overall.netWeight_kg += netWeight_kg;
-                results.overall.rawMaterialWeight_kg += rawMaterialWeight_kg;
-                results.overall.totalEfficiency += efficiency;
-                results.overall.groupCount++;
-
-                results.detailed[key] = {
-                    ...optimalPlan,
-                    weightPerMeter: group.weightPerMeter
-                };
-
-                optimalPlan.rawBars.forEach((bar) => {
-                    if (bar.rawLength > 0) {
-                        const scrap = bar.remaining;
-                        if (scrap >= SCRAP_THRESHOLD) {
-                            results.scrap.push({
-                                section: group.section,
-                                steel: group.steel,
-                                scrap_mm: scrap,
-                            });
-                        }
-                    }
-                });
+                audioBtn.classList.add('hidden');
             }
             
-            const aggregatedScrap = results.scrap.reduce((acc, item) => {
-                const key = `${item.section}|${item.steel}|${item.scrap_mm.toFixed(0)}`;
-                acc[key] = (acc[key] || 0) + 1;
-                return acc;
-            }, {});
-
-            results.aggregatedScrap = Object.keys(aggregatedScrap).map(key => {
-                const [section, steel, scrap_mm_str] = key.split('|');
-                const scrap_mm = parseFloat(scrap_mm_str);
-                return {
-                    section: section,
-                    steel: steel,
-                    scrap_mm: scrap_mm,
-                    scrap_m: (scrap_mm / 1000).toFixed(3),
-                    qty: aggregatedScrap[key]
-                };
-            }).sort((a, b) => b.scrap_mm - a.scrap_mm);
-
-            return results;
-        }
-
-        function findBestFitFixedLength(pieces, rawLength) {
-            const result = runSingleLengthPlan_BFD(pieces, rawLength);
+            const optionsContainer = document.getElementById('options-container');
+            optionsContainer.innerHTML = '';
             
-            return {
-                rawBars: result.bars.map(bar => ({
-                    cuts: bar.cuts,
-                    remaining: bar.remaining,
-                    rawLength: rawLength
-                }))
-            };
-        }
-
-        function findBestFitMultiLength(pieces) {
-            let remainingPieces = [...pieces].sort((a, b) => b.length - a.length);
-            const finalRawBars = [];
-            let stockLengthsUsed = new Set();
-            let attempts = 0;
-            const maxAttempts = AVAILABLE_LENGTHS.length * 3;
-            
-            while (remainingPieces.length > 0 && attempts < maxAttempts) {
-                attempts++;
-
-                let bestTrialPlan = null;
-                let bestUtilization = -Infinity;
-
-                for (const trialLength of AVAILABLE_LENGTHS) {
-                    if (stockLengthsUsed.has(trialLength)) continue;
-                    
-                    const trialPlan = runSingleLengthPlan_BFD(remainingPieces, trialLength);
-                    
-                    if (trialPlan.bars.length === 0) continue;
-                    
-                    const totalPlacedLength = trialPlan.bars.flatMap(bar => bar.cuts).reduce((a, b) => a + b.length, 0);
-                    const totalRawLengthUsed = trialPlan.bars.length * trialLength;
-                    
-                    const utilization = totalRawLengthUsed > 0 ? totalPlacedLength / totalRawLengthUsed : 0;
-
-                    if (utilization > bestUtilization) {
-                        bestUtilization = utilization;
-                        bestTrialPlan = { rawLength: trialLength, ...trialPlan };
-                    }
-                }
-
-                if (!bestTrialPlan) {
-                    break;
-                }
-
-                const optimalLength = bestTrialPlan.rawLength;
-                const optimizedBars = bestTrialPlan.bars;
-                
-                stockLengthsUsed.add(optimalLength);
-                
-                const placedCutIds = new Set(optimizedBars.flatMap(bar => bar.cuts).map(p => p.id));
-                remainingPieces = remainingPieces.filter(p => !placedCutIds.has(p.id));
-                
-                optimizedBars.forEach(bar => {
-                    finalRawBars.push({
-                        cuts: bar.cuts,
-                        remaining: bar.remaining,
-                        rawLength: optimalLength
-                    });
-                });
-                
-                if (remainingPieces.length > 0) {
-                    showMessage(`Warning: ${remainingPieces.length} pieces remain unallocated after trying ${stockLengthsUsed.size} different stock lengths.`, 'error');
-                }
-            }
-
-            return {
-                rawBars: finalRawBars,
-            };
-        }
-        
-        function runSingleLengthPlan_BFD(pieces, rawLength) {
-            const sortedPieces = [...pieces].sort((a, b) => b.length - a.length);
-            const bars = [];
-            
-            for (const piece of sortedPieces) {
-                const pieceLength = piece.length;
-                let placed = false;
-                let bestBarIndex = -1;
-                let smallestGap = Infinity;
-
-                for (let i = 0; i < bars.length; i++) {
-                    const bar = bars[i];
-                    if (bar.remaining >= pieceLength) {
-                        const currentGap = bar.remaining - pieceLength;
-                        if (currentGap < smallestGap) {
-                            smallestGap = currentGap;
-                            bestBarIndex = i;
-                        }
-                    }
-                }
-
-                if (bestBarIndex !== -1) {
-                    const bestBar = bars[bestBarIndex];
-                    bestBar.cuts.push(piece);
-                    bestBar.remaining -= pieceLength;
-                    placed = true;
-                }
-                
-                if (!placed) {
-                    if (pieceLength > rawLength) {
-                        continue;
-                    }
-                    bars.push({
-                        cuts: [piece],
-                        remaining: rawLength - pieceLength
-                    });
-                }
-            }
-
-            return { bars: bars };
-        }
-
-        // --- REPORT RENDERING ---
-
-        function formatLength(mm) {
-            if (mm === 0) return 'N/A';
-            return (mm / 1000).toFixed(3) + ' m';
-        }
-
-        function renderReports(plan) {
-            renderOverallSummary(plan.overall);
-            const summaryHTML = generateSummaryTable(plan.summary);
-            document.getElementById('summary-table').innerHTML = summaryHTML;
-            const scrapHTML = generateAggregatedScrapTable(plan.aggregatedScrap);
-            document.getElementById('scrap-table').innerHTML = scrapHTML;
-            const detailHTML = generateDetailedPlan(plan.detailed);
-            document.getElementById('detail-plan').innerHTML = detailHTML;
-        }
-
-        function renderOverallSummary(overall) {
-            const overallEfficiency = overall.rawMaterialWeight_kg > 0 
-                ? (overall.netWeight_kg / overall.rawMaterialWeight_kg * 100).toFixed(2)
-                : '0.00';
-                
-            const avgColor = parseFloat(overallEfficiency) >= 95 ? 'text-green-600' : 'text-orange-600';
-            
-            const netWeightTonne = convertKgToTonneFormatted(overall.netWeight_kg);
-            const rawMaterialWeightTonne = convertKgToTonneFormatted(overall.rawMaterialWeight_kg);
-
-            const html = `
-                <div class="p-4 border border-gray-200 rounded-xl bg-white">
-                    <p class="text-sm font-medium text-gray-500">Net Weight (Required Pieces)</p>
-                    <p class="text-3xl font-extrabold text-primary">${netWeightTonne} t</p>
-                    <p class="text-xs text-gray-500 mt-1">Weight of required cuts only</p>
-                </div>
-                <div class="p-4 border border-gray-200 rounded-xl bg-white">
-                    <p class="text-sm font-medium text-gray-500">Raw Material Weight</p>
-                    <p class="text-3xl font-extrabold text-secondary">${rawMaterialWeightTonne} t</p>
-                    <p class="text-xs text-gray-500 mt-1">Including scrap/waste</p>
-                </div>
-                <div class="p-4 border border-gray-200 rounded-xl bg-white">
-                    <p class="text-sm font-medium text-gray-500">Material Utilization Efficiency</p>
-                    <p class="text-3xl font-extrabold ${avgColor}">${overallEfficiency}%</p>
-                    <p class="text-xs text-gray-500 mt-1">Net Weight ÷ Raw Material Weight</p>
-                </div>
-            `;
-            document.getElementById('overall-summary').innerHTML = html;
-        }
-
-        function generateSummaryTable(summaryData) {
-            if (summaryData.length === 0) return '<p class="text-gray-500">No cutting plan generated.</p>';
-
-            const grandTotals = summaryData.reduce((acc, item) => {
-                acc.totalBars += item.rawBarsNeeded;
-                acc.netWeight_kg += item.netWeight_kg;
-                acc.rawMaterialWeight_kg += item.rawMaterialWeight_kg;
-                return acc;
-            }, { totalBars: 0, netWeight_kg: 0, rawMaterialWeight_kg: 0 });
-
-            const grandEfficiency = grandTotals.rawMaterialWeight_kg > 0 
-                ? (grandTotals.netWeight_kg / grandTotals.rawMaterialWeight_kg * 100).toFixed(2)
-                : '0.00';
-                
-            const avgColor = parseFloat(grandEfficiency) >= 95 ? 'text-green-600' : 'text-orange-600';
-
-            const grandNetWeightTonne = convertKgToTonneFormatted(grandTotals.netWeight_kg);
-            const grandRawMaterialWeightTonne = convertKgToTonneFormatted(grandTotals.rawMaterialWeight_kg);
-
-            let html = `
-                <table class="min-w-full divide-y divide-gray-200 rounded-lg overflow-hidden">
-                    <thead class="bg-primary text-white">
-                        <tr>
-                            <th class="px-3 py-3 text-left text-xs font-medium uppercase tracking-wider">Section</th>
-                            <th class="px-3 py-3 text-left text-xs font-medium uppercase tracking-wider">Steel Grade</th>
-                            <th class="px-3 py-3 text-left text-xs font-medium uppercase tracking-wider">Weight/m (kg)</th>
-                            <th class="px-3 py-3 text-left text-xs font-medium uppercase tracking-wider">Raw Lengths Used (Qty)</th>
-                            <th class="px-3 py-3 text-left text-xs font-medium uppercase tracking-wider">Total Bars</th>
-                            <th class="px-3 py-3 text-left text-xs font-medium uppercase tracking-wider">Net Weight (t)</th>
-                            <th class="px-3 py-3 text-left text-xs font-medium uppercase tracking-wider">Raw Material Weight (t)</th>
-                            <th class="px-3 py-3 text-left text-xs font-medium uppercase tracking-wider">Efficiency</th>
-                        </tr>
-                    </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
-            `;
-
-            summaryData.forEach(item => {
-                const efficiencyColor = item.efficiency >= 95 ? 'text-green-600 font-bold' : 'text-orange-600';
-                const netWeightTonne = convertKgToTonneFormatted(item.netWeight_kg);
-                const rawMaterialWeightTonne = convertKgToTonneFormatted(item.rawMaterialWeight_kg);
-                
-                const lengthsTags = item.rawLengthsUsed.map(l => 
-                    `<span class="raw-length-tag">${formatLength(l.length_mm)} x ${l.count}</span>`
-                ).join(' ');
-
-                html += `
-                    <tr class="hover:bg-gray-50">
-                        <td class="px-3 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${item.section}</td>
-                        <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-500">${item.steel}</td>
-                        <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-600">${item.weightPerMeter}</td>
-                        <td class="px-3 py-4 text-sm">${lengthsTags}</td>
-                        <td class="px-3 py-4 whitespace-nowrap text-sm font-bold text-secondary">${item.rawBarsNeeded}</td>
-                        <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-700">${netWeightTonne} t</td>
-                        <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-700">${rawMaterialWeightTonne} t</td>
-                        <td class="px-3 py-4 whitespace-nowrap text-sm ${efficiencyColor}">${item.efficiency.toFixed(2)}%</td>
-                    </tr>
-                `;
+            q.options.forEach((opt, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn w-full text-left p-4 rounded-xl border-2 border-gray-200 hover:border-blue-400 font-medium text-gray-700 bg-gray-50';
+                btn.innerText = opt;
+                btn.onclick = () => selectOption(index, btn);
+                optionsContainer.appendChild(btn);
             });
 
-            html += '</tbody>';
-
-            html += `
-                <tfoot>
-                    <tr class="total-row">
-                        <td class="px-3 py-4 whitespace-nowrap text-sm font-bold" colspan="4">GRAND TOTAL</td>
-                        <td class="px-3 py-4 whitespace-nowrap text-sm font-bold text-secondary">${grandTotals.totalBars}</td>
-                        <td class="px-3 py-4 whitespace-nowrap text-sm font-bold text-gray-700">${grandNetWeightTonne} t</td>
-                        <td class="px-3 py-4 whitespace-nowrap text-sm font-bold text-gray-700">${grandRawMaterialWeightTonne} t</td>
-                        <td class="px-3 py-4 whitespace-nowrap text-sm font-bold ${avgColor}">${grandEfficiency}%</td>
-                    </tr>
-                </tfoot>
-            `;
-
-            html += '</table>';
-
-            return html;
+            // تعطيل زر التالي وإعادة تعيين الاختيار
+            selectedOption = null;
+            const nextBtn = document.getElementById('next-btn');
+            nextBtn.disabled = true;
+            nextBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            if (currentIndex === totalQuestions - 1) {
+                nextBtn.innerText = "إنهاء الاختبار";
+            } else {
+                nextBtn.innerText = "السؤال التالي";
+            }
         }
 
-        function generateAggregatedScrapTable(scrapData) {
-            if (scrapData.length === 0) return '<p class="text-gray-500">No valuable scrap (≥ 1.5 m) was generated in this plan.</p>';
-
-            let html = `
-                <table class="min-w-full divide-y divide-gray-200 rounded-lg overflow-hidden">
-                    <thead class="bg-secondary text-white">
-                        <tr>
-                            <th class="px-3 py-3 text-left text-xs font-medium uppercase tracking-wider">Section</th>
-                            <th class="px-3 py-3 text-left text-xs font-medium uppercase tracking-wider">Steel Grade</th>
-                            <th class="px-3 py-3 text-left text-xs font-medium uppercase tracking-wider">Scrap Length</th>
-                            <th class="px-3 py-3 text-left text-xs font-medium uppercase tracking-wider">Quantity</th>
-                        </tr>
-                    </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
-            `;
-
-            scrapData.forEach(item => {
-                html += `
-                    <tr class="hover:bg-gray-50">
-                        <td class="px-3 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${item.section}</td>
-                        <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-500">${item.steel}</td>
-                        <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-700">${item.scrap_m} m</td>
-                        <td class="px-3 py-4 whitespace-nowrap text-sm font-bold text-secondary">${item.qty}</td>
-                    </tr>
-                `;
+        function selectOption(index, btnElement) {
+            selectedOption = index;
+            
+            // إزالة التحديد من باقي الأزرار
+            document.querySelectorAll('.option-btn').forEach(btn => {
+                btn.classList.remove('selected');
             });
+            // تحديد الزر الحالي
+            btnElement.classList.add('selected');
 
-            html += '</tbody></table>';
-
-            return html;
+            // تفعيل زر التالي
+            const nextBtn = document.getElementById('next-btn');
+            nextBtn.disabled = false;
+            nextBtn.classList.remove('opacity-50', 'cursor-not-allowed');
         }
 
-        function generateDetailedPlan(detailedData) {
-            let html = '';
+        function nextQuestion() {
+            if (selectedOption === null) return;
 
-            for (const key in detailedData) {
-                const [section, steel] = key.split('|');
-                const groupPlan = detailedData[key];
-                const weightPerMeter = groupPlan.weightPerMeter;
-                
-                html += `
-                    <div class="border border-gray-200 rounded-lg p-4 bg-white">
-                        <div class="flex justify-between items-center mb-4">
-                            <h3 class="text-lg font-semibold text-gray-800">${section} - ${steel}</h3>
-                            <div class="text-right">
-                                <span class="text-sm font-medium text-primary">${groupPlan.rawBars.filter(b => b.rawLength > 0).length} bars used</span>
-                                <div class="text-xs text-gray-500">Weight: ${weightPerMeter} kg/m</div>
-                            </div>
-                        </div>
-                `;
+            // إيقاف الصوت إن وجد عند الانتقال للسؤال التالي
+            window.speechSynthesis.cancel();
 
-                const patternGroups = groupPlan.rawBars.filter(b => b.rawLength > 0).reduce((acc, bar) => {
-                    const patternKey = `${bar.rawLength}|${bar.cuts.map(c => `${c.length}-${c.item}`).join(',')}`;
-                    if (!acc[patternKey]) {
-                        acc[patternKey] = {
-                            rawLength: bar.rawLength,
-                            cuts: bar.cuts,
-                            count: 0,
-                            totalScrap: 0
-                        };
-                    }
-                    acc[patternKey].count++;
-                    acc[patternKey].totalScrap += bar.remaining;
-                    return acc;
-                }, {});
-
-                const patterns = Object.values(patternGroups).sort((a, b) => b.count - a.count);
-
-                if (patterns.length === 0) {
-                    html += '<p class="text-gray-500">No valid cutting patterns generated.</p>';
-                } else {
-                    patterns.forEach((pattern, index) => {
-                        const usedWeight = ((pattern.rawLength - (pattern.totalScrap / pattern.count)) / 1000) * weightPerMeter;
-                        const totalWeight = (pattern.rawLength / 1000) * weightPerMeter;
-                        const efficiency = totalWeight > 0 ? (usedWeight / totalWeight * 100).toFixed(1) : '0.0';
-                        
-                        const efficiencyColor = efficiency >= 95 ? 'text-green-600' : 'text-orange-600';
-                        
-                        html += `
-                            <div class="mb-4 p-3 border border-gray-100 rounded-md bg-gray-50">
-                                <div class="flex justify-between items-center mb-2">
-                                    <span class="font-medium">Pattern ${index + 1} <span class="text-xs font-normal text-gray-500">(x${pattern.count})</span></span>
-                                    <div class="flex items-center">
-                                        <span class="text-sm font-medium mr-2">Raw: ${formatLength(pattern.rawLength)}</span>
-                                        <span class="text-xs ${efficiencyColor} font-semibold">${efficiency}% eff.</span>
-                                    </div>
-                                </div>
-                                <div class="flex flex-wrap gap-2">
-                        `;
-
-                        const groupedCuts = pattern.cuts.reduce((acc, cut) => {
-                            const key = `${cut.item}-${cut.length}`;
-                            if (!acc[key]) {
-                                acc[key] = {
-                                    item: cut.item,
-                                    length: cut.length,
-                                    count: 0
-                                };
-                            }
-                            acc[key].count++;
-                            return acc;
-                        }, {});
-
-                        Object.values(groupedCuts).forEach(cutGroup => {
-                            html += `
-                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                    ${cutGroup.item} (${formatLength(cutGroup.length)})${cutGroup.count > 1 ? ` ×${cutGroup.count}` : ''}
-                                </span>
-                            `;
-                        });
-
-                        html += `
-                                </div>
-                                <div class="mt-2 text-xs text-gray-500">
-                                    Scrap per bar: ${formatLength(pattern.totalScrap / pattern.count)}
-                                </div>
-                            </div>
-                        `;
-                    });
-                }
-
-                html += '</div>';
+            // التحقق من الإجابة
+            if (selectedOption === currentQuestions[currentIndex].answer) {
+                score++;
             }
 
-            return html;
-        }
+            currentIndex++;
 
-        // --- EXPORT FUNCTIONS ---
-
-        function exportToExcel() {
-            try {
-                const wb = XLSX.utils.book_new();
-                
-                // Summary Sheet
-                const summaryData = finalPlan.summary.map(item => ({
-                    'Section': item.section,
-                    'Steel Grade': item.steel,
-                    'Weight per meter (kg/m)': item.weightPerMeter,
-                    'Raw Lengths Used': item.rawLengthsUsed.map(l => `${formatLength(l.length_mm)} x ${l.count}`).join(', '),
-                    'Total Bars': item.rawBarsNeeded,
-                    'Net Weight (t)': convertKgToTonneFormatted(item.netWeight_kg),
-                    'Raw Material Weight (t)': convertKgToTonneFormatted(item.rawMaterialWeight_kg),
-                    'Efficiency (%)': item.efficiency.toFixed(2)
-                }));
-                
-                const summaryWs = XLSX.utils.json_to_sheet(summaryData);
-                XLSX.utils.book_append_sheet(wb, summaryWs, 'Summary');
-                
-                // Scrap Sheet
-                const scrapData = finalPlan.aggregatedScrap.map(item => ({
-                    'Section': item.section,
-                    'Steel Grade': item.steel,
-                    'Scrap Length (m)': item.scrap_m,
-                    'Quantity': item.qty
-                }));
-                
-                const scrapWs = XLSX.utils.json_to_sheet(scrapData);
-                XLSX.utils.book_append_sheet(wb, scrapWs, 'Scrap Report');
-                
-                // Detailed Plan Sheet - AGGREGATED BY PATTERN
-                let detailedData = [];
-                
-                for (const key in finalPlan.detailed) {
-                    const [section, steel] = key.split('|');
-                    const groupPlan = finalPlan.detailed[key];
-                    const weightPerMeter = groupPlan.weightPerMeter;
-                    
-                    // Group bars by pattern (same raw length and same cuts)
-                    const patternGroups = groupPlan.rawBars.filter(b => b.rawLength > 0).reduce((acc, bar) => {
-                        const patternKey = `${bar.rawLength}|${bar.cuts.map(c => `${c.length}-${c.item}`).join(',')}`;
-                        if (!acc[patternKey]) {
-                            acc[patternKey] = {
-                                rawLength: bar.rawLength,
-                                cuts: bar.cuts,
-                                count: 0,
-                                totalScrap: 0
-                            };
-                        }
-                        acc[patternKey].count++;
-                        acc[patternKey].totalScrap += bar.remaining;
-                        return acc;
-                    }, {});
-
-                    // Convert to array and sort by count (descending)
-                    const patterns = Object.values(patternGroups).sort((a, b) => b.count - a.count);
-
-                    patterns.forEach((pattern, patternIndex) => {
-                        // Calculate efficiency for this pattern
-                        const usedWeight = ((pattern.rawLength - (pattern.totalScrap / pattern.count)) / 1000) * weightPerMeter;
-                        const totalWeight = (pattern.rawLength / 1000) * weightPerMeter;
-                        const efficiency = totalWeight > 0 ? (usedWeight / totalWeight * 100).toFixed(1) : '0.0';
-                        
-                        // Group cuts by item and length
-                        const groupedCuts = pattern.cuts.reduce((acc, cut) => {
-                            const key = `${cut.item}-${cut.length}`;
-                            if (!acc[key]) {
-                                acc[key] = {
-                                    item: cut.item,
-                                    length: cut.length,
-                                    count: 0
-                                };
-                            }
-                            acc[key].count++;
-                            return acc;
-                        }, {});
-
-                        // Create cuts description
-                        const cutsDescription = Object.values(groupedCuts).map(cut => 
-                            `${cut.item} (${formatLength(cut.length)})${cut.count > 1 ? ` ×${cut.count}` : ''}`
-                        ).join(', ');
-
-                        detailedData.push({
-                            'Section': section,
-                            'Steel Grade': steel,
-                            'Pattern #': patternIndex + 1,
-                            'Quantity': pattern.count,
-                            'Raw Material Length (m)': formatLength(pattern.rawLength),
-                            'Cuts Description': cutsDescription,
-                            'Scrap per Bar (m)': formatLength(pattern.totalScrap / pattern.count),
-                            'Efficiency (%)': efficiency + '%',
-                            'Weight per meter (kg/m)': weightPerMeter
-                        });
-                    });
-                }
-                
-                const detailedWs = XLSX.utils.json_to_sheet(detailedData);
-                XLSX.utils.book_append_sheet(wb, detailedWs, 'Detailed Plan (Aggregated)');
-                
-                XLSX.writeFile(wb, 'Cutting_Optimization_Plan.xlsx');
-                showMessage('Excel file exported successfully!', 'success');
-            } catch (error) {
-                console.error('Error exporting to Excel:', error);
-                showMessage('Error exporting to Excel: ' + error.message, 'error');
+            if (currentIndex < currentQuestions.length) {
+                loadQuestion();
+            } else {
+                showResults();
             }
         }
 
-        function exportToPDF() {
-            try {
-                const { jsPDF } = window.jspdf;
-                const doc = new jsPDF();
-                
-                doc.setFontSize(16);
-                doc.text('Cutting Optimization Plan', 20, 20);
-                doc.setFontSize(12);
-                doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 20, 30);
-                doc.text(`Raw Material Option: ${selectedOption === 'fixed' ? 'Fixed 12M Length' : 'Variable Lengths (Optimized)'}`, 20, 40);
-                
-                // Overall Optimization Summary
-                doc.setFontSize(14);
-                doc.text('3. Overall Optimization Summary', 20, 60);
-                
-                const overallEfficiency = finalPlan.overall.rawMaterialWeight_kg > 0 
-                    ? (finalPlan.overall.netWeight_kg / finalPlan.overall.rawMaterialWeight_kg * 100).toFixed(2)
-                    : '0.00';
-                
-                const netWeightTonne = convertKgToTonneFormatted(finalPlan.overall.netWeight_kg);
-                const rawMaterialWeightTonne = convertKgToTonneFormatted(finalPlan.overall.rawMaterialWeight_kg);
-                
-                doc.autoTable({
-                    startY: 70,
-                    head: [['Metric', 'Value']],
-                    body: [
-                        ['Net Weight (Required Pieces)', `${netWeightTonne} t`],
-                        ['Raw Material Weight (Including scrap)', `${rawMaterialWeightTonne} t`],
-                        ['Material Utilization Efficiency', `${overallEfficiency}%`]
-                    ],
-                    theme: 'grid',
-                    headStyles: { fillColor: [5, 150, 105] },
-                    styles: { fontSize: 11 }
-                });
-                
-                // Cutting Plan Details by Material Group
-                doc.addPage();
-                doc.setFontSize(14);
-                doc.text('3.1. Cutting Plan Details by Material Group', 20, 20);
-                
-                let tableData = [];
-                
-                finalPlan.summary.forEach(item => {
-                    tableData.push([
-                        item.section,
-                        item.steel,
-                        item.weightPerMeter.toString(),
-                        item.rawBarsNeeded.toString(),
-                        convertKgToTonneFormatted(item.netWeight_kg),
-                        convertKgToTonneFormatted(item.rawMaterialWeight_kg),
-                        item.efficiency.toFixed(2) + '%'
-                    ]);
-                    
-                    item.rawLengthsUsed.forEach(lengthInfo => {
-                        tableData.push([
-                            '',
-                            '',
-                            `→ ${formatLength(lengthInfo.length_mm)}`,
-                            `× ${lengthInfo.count}`,
-                            '',
-                            '',
-                            ''
-                        ]);
-                    });
-                    
-                    tableData.push(['', '', '', '', '', '', '']);
-                });
-                
-                if (tableData.length > 0) {
-                    tableData.pop();
-                }
-                
-                doc.autoTable({
-                    startY: 30,
-                    head: [['Section', 'Steel Grade', 'Weight/m (kg)', 'Total Bars', 'Net Weight (t)', 'Raw Material Weight (t)', 'Efficiency']],
-                    body: tableData,
-                    theme: 'grid',
-                    headStyles: { fillColor: [59, 130, 246] },
-                    styles: { fontSize: 10 },
-                    columnStyles: {
-                        0: { cellWidth: 25 },
-                        1: { cellWidth: 25 },
-                        2: { cellWidth: 25 },
-                        3: { cellWidth: 20 },
-                        4: { cellWidth: 25 },
-                        5: { cellWidth: 30 },
-                        6: { cellWidth: 20 }
-                    }
-                });
-                
-                // Valuable Scrap Report
-                if (finalPlan.aggregatedScrap.length > 0) {
-                    doc.addPage();
-                    doc.setFontSize(14);
-                    doc.text('4. Valuable Scrap Report (≥ 1.5 m)', 20, 20);
-                    
-                    doc.autoTable({
-                        startY: 30,
-                        head: [['Section', 'Steel Grade', 'Scrap Length (m)', 'Quantity']],
-                        body: finalPlan.aggregatedScrap.map(item => [
-                            item.section,
-                            item.steel,
-                            item.scrap_m,
-                            item.qty.toString()
-                        ]),
-                        theme: 'grid',
-                        headStyles: { fillColor: [255, 87, 51] }
-                    });
-                }
-                
-                doc.save('Cutting_Optimization_Plan.pdf');
-                showMessage('PDF file exported successfully!', 'success');
-            } catch (error) {
-                console.error('Error exporting to PDF:', error);
-                showMessage('Error exporting to PDF: ' + error.message, 'error');
+        function showResults() {
+            document.getElementById('quiz-screen').classList.add('hidden');
+            document.getElementById('result-screen').classList.remove('hidden');
+            
+            const maxScore = currentQuestions.length;
+            const percentage = Math.round((score / maxScore) * 100);
+
+            document.getElementById('completed-count').innerText = maxScore;
+            document.getElementById('final-score').innerText = score;
+            document.getElementById('max-score').innerText = maxScore;
+            document.getElementById('percentage-score').innerText = percentage;
+            
+            let cefr = "";
+            let desc = "";
+
+            if (percentage <= 20) {
+                cefr = "A1 (مبتدئ - Beginner)";
+                desc = "لديك فهم أساسي جداً للغة. يمكنك استخدام عبارات بسيطة مألوفة واحتياجات يومية. ننصحك بالبدء بأساسيات القواعد والمفردات اليومية.";
+            } else if (percentage <= 40) {
+                cefr = "A2 (أساسي - Elementary)";
+                desc = "يمكنك فهم الجمل والتعابير المستخدمة بشكل متكرر. يمكنك التواصل في مهام بسيطة وروتينية، ولكن تحتاج إلى توسيع حصيلتك اللغوية.";
+            } else if (percentage <= 60) {
+                cefr = "B1 (متوسط - Intermediate)";
+                desc = "أنت قادر على فهم النقاط الرئيسية وتكوين جمل متصلة في مواضيع مألوفة. تستطيع التعامل مع معظم المواقف أثناء السفر. مستواك جيد جداً ويحتاج ممارسة أكثر.";
+            } else if (percentage <= 80) {
+                cefr = "B2 (فوق المتوسط - Upper Intermediate)";
+                desc = "يمكنك فهم الأفكار الرئيسية للنصوص المعقدة، وتستطيع التحدث بطلاقة وتلقائية مع الناطقين بها. مستواك يؤهلك للعمل أو الدراسة باللغة الإنجليزية.";
+            } else if (percentage <= 90) {
+                cefr = "C1 (متقدم - Advanced)";
+                desc = "يمكنك فهم مجموعة واسعة من النصوص الطويلة والصعبة، والتعبير عن أفكارك بطلاقة وبدون بحث واضح عن الكلمات. لغتك قوية جداً.";
+            } else {
+                cefr = "C2 (خبير - Proficient)";
+                desc = "مستواك يعادل الناطقين الأصليين باللغة. يمكنك فهم كل ما تقرأه أو تسمعه بسهولة، وتلخيص المعلومات بشكل دقيق ومترابط.";
             }
+
+            document.getElementById('cefr-level').innerText = cefr;
+            document.getElementById('level-description').innerText = desc;
         }
 
-        // Initialize the UI with the default selection
-        document.addEventListener('DOMContentLoaded', function() {
-            selectOption('fixed');
-        });
+        // تشغيل الصوت لأسئلة الاستماع
+        function playAudio() {
+            if (!currentQuestions || !currentQuestions[currentIndex]) return;
+            const textToSpeak = currentQuestions[currentIndex].audioText;
+            if (textToSpeak) {
+                // إيقاف أي صوت شغال حالياً
+                window.speechSynthesis.cancel();
+                
+                const utterance = new SpeechSynthesisUtterance(textToSpeak);
+                utterance.lang = 'en-US';
+                utterance.rate = 0.9; // سرعة القراءة
+                window.speechSynthesis.speak(utterance);
+            }
+        }
     </script>
 </body>
 </html>
