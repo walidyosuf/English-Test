@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>English Placement Test</title>
+    <title>English Placement Test - مع التصحيح</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
@@ -19,20 +19,44 @@
             color: white;
             border-color: #3b82f6;
         }
+        .option-btn.correct {
+            background-color: #22c55e !important;
+            color: white !important;
+            border-color: #22c55e !important;
+        }
+        .option-btn.incorrect {
+            background-color: #ef4444 !important;
+            color: white !important;
+            border-color: #ef4444 !important;
+        }
+        .option-btn:disabled {
+            cursor: not-allowed;
+            opacity: 0.8;
+        }
         .english-text {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .feedback-icon {
+            font-size: 1.5rem;
+            margin-left: 8px;
+        }
+        .review-card {
+            transition: transform 0.2s;
+        }
+        .review-card:hover {
+            transform: translateY(-2px);
         }
     </style>
 </head>
 <body class="min-h-screen flex items-center justify-center p-4">
 
     <!-- الحاوية الرئيسية -->
-    <div class="bg-white rounded-2xl shadow-xl w-full max-w-3xl overflow-hidden relative">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-4xl overflow-hidden relative">
         
         <!-- رأس التطبيق -->
         <div class="bg-blue-600 p-6 text-white text-center" dir="ltr">
             <h1 class="text-3xl font-bold mb-2 english-text">English Placement Test</h1>
-            <p class="text-blue-100 english-text">Massive question bank (250 questions) with progressive difficulty (A1 to C2)</p>
+            <p class="text-blue-100 english-text">Massive question bank (250 questions) with progressive difficulty (A1 to C2) + Answer Correction</p>
         </div>
 
         <!-- شاشة الإعداد (اختيار المهارة) -->
@@ -77,7 +101,7 @@
             </div>
 
             <!-- السؤال -->
-            <div dir="ltr" class="text-left english-text mb-8">
+            <div dir="ltr" class="text-left english-text mb-6">
                 <div class="flex items-start justify-between mb-6 gap-4">
                     <h3 id="question-text" class="text-2xl font-bold text-gray-800">Question text goes here?</h3>
                     <button id="audio-btn" onclick="playAudio()" class="hidden flex-shrink-0 bg-blue-100 hover:bg-blue-200 text-blue-700 p-3 rounded-full transition shadow-sm" title="استمع للصوت">
@@ -87,6 +111,15 @@
                 <div id="options-container" class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <!-- الخيارات سيتم إضافتها هنا بواسطة الجافاسكريبت -->
                 </div>
+            </div>
+
+            <!-- منطقة التصحيح الفوري -->
+            <div id="feedback-area" class="hidden mb-6 p-4 rounded-xl bg-gray-50 border-2">
+                <div class="flex items-center gap-3 mb-2">
+                    <span id="feedback-icon" class="text-2xl"></span>
+                    <span id="feedback-text" class="font-bold text-lg"></span>
+                </div>
+                <p id="correct-answer-text" class="text-gray-700 mr-8"></p>
             </div>
 
             <!-- زر التالي -->
@@ -117,16 +150,46 @@
                 <p id="level-description" class="text-gray-600 mb-8 max-w-lg mx-auto leading-relaxed">
                     وصف المستوى سيظهر هنا.
                 </p>
-                <button onclick="location.reload()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transition">
-                    إعادة الاختبار
+                
+                <!-- أزرار الإجراءات -->
+                <div class="flex flex-wrap justify-center gap-4 mb-6">
+                    <button onclick="showReview()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-full shadow-lg transition">
+                        📋 مراجعة الإجابات
+                    </button>
+                    <button onclick="location.reload()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transition">
+                        🔄 إعادة الاختبار
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- شاشة المراجعة -->
+        <div id="review-screen" class="p-8 hidden">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-800">📋 مراجعة الإجابات</h2>
+                <button onclick="backToResults()" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-lg transition">
+                    ← العودة للنتائج
                 </button>
+            </div>
+            
+            <div class="mb-4 flex gap-4 justify-center">
+                <span class="flex items-center gap-2 text-sm">
+                    <span class="w-4 h-4 rounded-full bg-green-500"></span> إجابة صحيحة
+                </span>
+                <span class="flex items-center gap-2 text-sm">
+                    <span class="w-4 h-4 rounded-full bg-red-500"></span> إجابة خاطئة
+                </span>
+            </div>
+            
+            <div id="review-container" class="space-y-4 max-h-96 overflow-y-auto pr-2">
+                <!-- سيتم ملء بطاقات المراجعة هنا -->
             </div>
         </div>
 
     </div>
 
     <script>
-        // دالة مساعدة لتسهيل إنشاء كائنات الأسئلة (لكي لا يطول الكود بشكل مفرط)
+        // دالة مساعدة لتسهيل إنشاء كائنات الأسئلة
         function q(text, opt, ans, lvl, type = "text", audio = "") {
             return { q: text, options: opt, answer: ans, level: lvl, type: type, audioText: audio };
         }
@@ -414,33 +477,32 @@
         quizData.all = [];
         ['grammar', 'vocabulary', 'reading', 'listening', 'writing'].forEach(cat => {
             const data = quizData[cat];
-            // نأخذ عينات من جميع المستويات الستة (المجموع 10 أسئلة لكل مهارة)
             quizData.all.push(
-                data[0], data[4],   // 2 from A1
-                data[9], data[13],  // 2 from A2
-                data[18], data[22], // 2 from B1
-                data[27], data[31], // 2 from B2
-                data[36],           // 1 from C1
-                data[45]            // 1 from C2
+                data[0], data[4],
+                data[9], data[13],
+                data[18], data[22],
+                data[27], data[31],
+                data[36],
+                data[45]
             );
         });
 
+        // المتغيرات العامة
         let selectedCategoryKey = null;
         let currentQuestions = [];
         let currentIndex = 0;
         let score = 0;
         let selectedOption = null;
+        let userAnswers = []; // لتخزين إجابات المستخدم للمراجعة
 
         function selectCategory(category) {
             selectedCategoryKey = category;
             
-            // تمييز الزر المختار
             document.querySelectorAll('.category-btn').forEach(btn => {
                 btn.classList.remove('border-blue-500', 'bg-blue-50', 'text-blue-700');
             });
             event.currentTarget.classList.add('border-blue-500', 'bg-blue-50', 'text-blue-700');
             
-            // تفعيل زر البدء
             const startBtn = document.getElementById('start-btn');
             startBtn.disabled = false;
             startBtn.classList.remove('opacity-50', 'cursor-not-allowed');
@@ -450,6 +512,7 @@
             if (!selectedCategoryKey) return;
             
             currentQuestions = quizData[selectedCategoryKey];
+            userAnswers = []; // إعادة تعيين إجابات المستخدم
             document.getElementById('setup-screen').classList.add('hidden');
             document.getElementById('quiz-screen').classList.remove('hidden');
             
@@ -460,11 +523,9 @@
             const q = currentQuestions[currentIndex];
             const totalQuestions = currentQuestions.length;
             
-            // تحديث الواجهة
             document.getElementById('question-counter').innerText = `السؤال ${currentIndex + 1} من ${totalQuestions}`;
             document.getElementById('difficulty-badge').innerText = q.level;
             
-            // تغيير لون البادج بناء على المستوى
             const badge = document.getElementById('difficulty-badge');
             badge.className = "px-2 py-1 rounded text-xs font-bold ";
             if(q.level.includes("A1") || q.level.includes("A2")) badge.className += "bg-green-100 text-green-800";
@@ -474,7 +535,6 @@
             document.getElementById('progress-bar').style.width = `${((currentIndex) / totalQuestions) * 100}%`;
             document.getElementById('question-text').innerText = `${currentIndex + 1}. ${q.q}`;
             
-            // إظهار أو إخفاء زر الصوت
             const audioBtn = document.getElementById('audio-btn');
             if (q.type === 'listening') {
                 audioBtn.classList.remove('hidden');
@@ -490,11 +550,14 @@
                 btn.className = 'option-btn w-full text-left p-4 rounded-xl border-2 border-gray-200 hover:border-blue-400 font-medium text-gray-700 bg-gray-50';
                 btn.innerText = opt;
                 btn.onclick = () => selectOption(index, btn);
+                btn.dataset.index = index;
                 optionsContainer.appendChild(btn);
             });
 
-            // تعطيل زر التالي وإعادة تعيين الاختيار
+            // إخفاء منطقة التصحيح وإعادة تعيين الحالة
+            document.getElementById('feedback-area').classList.add('hidden');
             selectedOption = null;
+            
             const nextBtn = document.getElementById('next-btn');
             nextBtn.disabled = true;
             nextBtn.classList.add('opacity-50', 'cursor-not-allowed');
@@ -506,15 +569,62 @@
         }
 
         function selectOption(index, btnElement) {
-            selectedOption = index;
+            if (selectedOption !== null) return; // منع تغيير الإجابة بعد الاختيار
             
-            // إزالة التحديد من باقي الأزرار
-            document.querySelectorAll('.option-btn').forEach(btn => {
-                btn.classList.remove('selected');
+            selectedOption = index;
+            const q = currentQuestions[currentIndex];
+            const isCorrect = (index === q.answer);
+            
+            // تخزين الإجابة للمراجعة
+            userAnswers.push({
+                questionIndex: currentIndex,
+                question: q.q,
+                selectedOption: index,
+                selectedText: q.options[index],
+                correctOption: q.answer,
+                correctText: q.options[q.answer],
+                isCorrect: isCorrect,
+                level: q.level
             });
-            // تحديد الزر الحالي
-            btnElement.classList.add('selected');
-
+            
+            // تحديث النتيجة
+            if (isCorrect) {
+                score++;
+            }
+            
+            // تلوين الأزرار وإظهار التصحيح
+            document.querySelectorAll('.option-btn').forEach(btn => {
+                btn.disabled = true;
+                const btnIndex = parseInt(btn.dataset.index);
+                if (btnIndex === q.answer) {
+                    btn.classList.add('correct');
+                }
+                if (btnIndex === index && !isCorrect) {
+                    btn.classList.add('incorrect');
+                }
+            });
+            
+            // إظهار منطقة التصحيح
+            const feedbackArea = document.getElementById('feedback-area');
+            const feedbackIcon = document.getElementById('feedback-icon');
+            const feedbackText = document.getElementById('feedback-text');
+            const correctAnswerText = document.getElementById('correct-answer-text');
+            
+            feedbackArea.classList.remove('hidden');
+            
+            if (isCorrect) {
+                feedbackArea.className = "mb-6 p-4 rounded-xl bg-green-50 border-2 border-green-300";
+                feedbackIcon.innerText = "✅";
+                feedbackText.innerText = "إجابة صحيحة! أحسنت!";
+                feedbackText.className = "font-bold text-lg text-green-700";
+            } else {
+                feedbackArea.className = "mb-6 p-4 rounded-xl bg-red-50 border-2 border-red-300";
+                feedbackIcon.innerText = "❌";
+                feedbackText.innerText = "إجابة غير صحيحة";
+                feedbackText.className = "font-bold text-lg text-red-700";
+                correctAnswerText.innerText = `الإجابة الصحيحة: ${q.options[q.answer]}`;
+            }
+            
             // تفعيل زر التالي
             const nextBtn = document.getElementById('next-btn');
             nextBtn.disabled = false;
@@ -524,14 +634,7 @@
         function nextQuestion() {
             if (selectedOption === null) return;
 
-            // إيقاف الصوت إن وجد عند الانتقال للسؤال التالي
             window.speechSynthesis.cancel();
-
-            // التحقق من الإجابة
-            if (selectedOption === currentQuestions[currentIndex].answer) {
-                score++;
-            }
-
             currentIndex++;
 
             if (currentIndex < currentQuestions.length) {
@@ -580,17 +683,56 @@
             document.getElementById('level-description').innerText = desc;
         }
 
-        // تشغيل الصوت لأسئلة الاستماع
+        // عرض شاشة المراجعة
+        function showReview() {
+            document.getElementById('result-screen').classList.add('hidden');
+            document.getElementById('review-screen').classList.remove('hidden');
+            
+            const container = document.getElementById('review-container');
+            container.innerHTML = '';
+            
+            userAnswers.forEach((answer, index) => {
+                const card = document.createElement('div');
+                card.className = 'review-card p-4 rounded-xl border-2 ' + (answer.isCorrect ? 'border-green-300 bg-green-50' : 'border-red-300 bg-red-50');
+                
+                card.innerHTML = `
+                    <div class="flex items-start justify-between mb-2">
+                        <span class="font-bold text-gray-800">س${index + 1}:</span>
+                        <span class="px-2 py-1 rounded text-xs font-bold ${answer.level.includes('A') ? 'bg-green-100 text-green-800' : answer.level.includes('B') ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'}">
+                            ${answer.level}
+                        </span>
+                    </div>
+                    <p class="text-gray-700 mb-3 english-text" dir="ltr">${answer.question}</p>
+                    <div class="space-y-2">
+                        <div class="flex items-center gap-2">
+                            <span class="${answer.isCorrect ? 'text-green-600' : 'text-red-600'} font-bold">إجابتك:</span>
+                            <span class="${answer.isCorrect ? 'text-green-700' : 'text-red-700'}">${answer.selectedText}</span>
+                            ${answer.isCorrect ? '<span class="text-green-500">✓</span>' : '<span class="text-red-500">✗</span>'}
+                        </div>
+                        ${!answer.isCorrect ? `
+                        <div class="flex items-center gap-2">
+                            <span class="text-green-600 font-bold">الإجابة الصحيحة:</span>
+                            <span class="text-green-700">${answer.correctText}</span>
+                        </div>` : ''}
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function backToResults() {
+            document.getElementById('review-screen').classList.add('hidden');
+            document.getElementById('result-screen').classList.remove('hidden');
+        }
+
         function playAudio() {
             if (!currentQuestions || !currentQuestions[currentIndex]) return;
             const textToSpeak = currentQuestions[currentIndex].audioText;
             if (textToSpeak) {
-                // إيقاف أي صوت شغال حالياً
                 window.speechSynthesis.cancel();
-                
                 const utterance = new SpeechSynthesisUtterance(textToSpeak);
                 utterance.lang = 'en-US';
-                utterance.rate = 0.9; // سرعة القراءة
+                utterance.rate = 0.9;
                 window.speechSynthesis.speak(utterance);
             }
         }
